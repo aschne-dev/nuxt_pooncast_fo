@@ -22,6 +22,7 @@
 
         <section id="faq">
             <HomeFaq />
+            
         </section> 
     </div>    
 
