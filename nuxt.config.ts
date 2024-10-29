@@ -7,18 +7,7 @@ export default defineNuxtConfig({
     head: {      
       htmlAttrs: {
         lang: 'fr'
-      },
-      /*script: [
-        {
-          hid: 'cookiebot',
-          id: 'Cookiebot',
-          src: 'https://consent.cookiebot.com/uc.js',
-          'data-cbid': '740cab42-2799-4288-8780-7a2448bdade0',
-          type: 'text/javascript',
-          async: true,
-        }
-      ],*/
-      
+      },      
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },

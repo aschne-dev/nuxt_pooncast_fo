@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-primary bg-opacity-80">
+  <div class="bg-primary bg-opacity-80" aria-labelledby="blog-detail-title">
     
     <div class="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10 mx-5">
       
      <!-- COLONNE GAUCHE -->
-    <div class="flex flex-col items-center lg:items-start lg:col-span-1">
+    <div class="flex flex-col items-center lg:items-start lg:col-span-1" aria-labelledby="summary-title">
       <div class="lg:sticky lg:top-5 lg:self-start sticky  lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto">
         
         <!-- TITRE -->
@@ -121,8 +121,8 @@
 
     <!-- LIEN VERS HOME BLOG -->
     <div class="mt-8 flex items-center justify-center w-full lg:px-10" data-aos="fade-up">
-      <NuxtLink  to="/poonblog/" title="Voir tous le articles">
-          <button class="btn-secondary" data-aos="fade" aria-label="Voir tous les articles">Voir tous les articles</button>   
+      <NuxtLink  to="/poonblog/" title="Voir tous le articles" aria-label="Voir tous les articles">
+          <button class="btn-secondary" data-aos="fade" >Voir tous les articles</button>   
       </NuxtLink>  
     </div>
 

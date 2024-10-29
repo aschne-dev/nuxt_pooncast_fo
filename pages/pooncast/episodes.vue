@@ -1,49 +1,62 @@
 <template>
   <div>
-    <section id="SaisonsTop">
+    <section id="SaisonsTop" aria-labelledby="episodes-title">
       <div class="mx-2 mt-[150px] text-center">
-        <h1 class="font-syne">Épisodes</h1>
-        <h2 class="font-nunito font-normal text-lg lg:text-xl text-center mt-3 mx-10">Retrouvez ici tous les épisodes du Pooncast par saison.</h2>
-        <img class="mt-10 mx-auto" src="@/assets/img/episodes/stars_pattern.svg" alt="Retrouvez ici tous les épisodes du Pooncast par saison."/>
-        
-        
+        <!-- Titre principal de la page -->
+        <h1 id="episodes-title" class="font-syne">Épisodes</h1>
+        <h2 class="font-nunito font-normal text-lg lg:text-xl text-center mt-3 mx-10">
+          Retrouvez ici tous les épisodes du Pooncast par saison.
+        </h2>
+        <img class="mt-10 mx-auto" src="@/assets/img/episodes/stars_pattern.svg" alt="Retrouvez ici tous les épisodes du Pooncast par saison." />
 
+        <!-- Sélecteur de saison avec aria-label -->
         <div class="w-full mt-12 mx-auto px-5">
-          <div v-if="loading" class="flex justify-center">
+          <div v-if="loading" class="flex justify-center" aria-busy="true">
             <Loading fillColor="fill-secondary" />
           </div>
-          <select v-else aria-label="Choisir une saison" v-model="selectedSeason" @change="onSeasonChange" 
-          class="block w-full md:w-2/3 lg:w-1/2 xl:w-1/3 md:mx-auto mt-1 bg-primary border border-secondary rounded-md shadow-sm px-5 py-2 font-syne text-lg md:text-xl focus:border-secondary focus:outline-none">
+          <select
+            v-else
+            aria-label="Choisir une saison"
+            v-model="selectedSeason"
+            @change="onSeasonChange"
+            class="block w-full md:w-2/3 lg:w-1/2 xl:w-1/3 md:mx-auto mt-1 bg-primary border border-secondary rounded-md shadow-sm px-5 py-2 font-syne text-lg md:text-xl focus:border-secondary focus:outline-none"
+          >
             <option v-for="season in seasons" :key="season.id" :value="season.id">
               #{{ season.id }} . {{ season.title }}
             </option>
           </select>
         </div>
-
       </div>
     </section>
 
-    <section id="EpisodesBySeason">
+    <!-- Section pour les épisodes d'une saison spécifique -->
+    <section id="EpisodesBySeason" aria-labelledby="episodes-by-season">
+      <h2 id="episodes-by-season" class="sr-only">Épisodes par saison sélectionnée</h2>
       <PooncastBySeason :season="selectedSeason" @no-episodes="handleNoEpisodes" />
     </section>
 
-    <section id="SaisonsBottom" v-if="!noEpisodes">
+    <!-- Sélecteur de saison en bas de page, réutilisé pour naviguer entre saisons -->
+    <section id="SaisonsBottom" v-if="!noEpisodes" aria-labelledby="choose-season-bottom">
       <div class="mx-2 mt-10 text-center">
-         <div class="w-full mt-12 mx-auto px-5">
-          <div v-if="loading" class="flex justify-center">
+        <h2 id="choose-season-bottom" class="sr-only">Choisissez une saison pour afficher les épisodes</h2>
+        <div class="w-full mt-12 mx-auto px-5">
+          <div v-if="loading" class="flex justify-center" aria-busy="true">
             <Loading fillColor="fill-secondary" />
           </div>
-          <select v-else aria-label="Choisir une saison" v-model="selectedSeason" @change="onSeasonChange" 
-          class="block w-full md:w-2/3 lg:w-1/2 xl:w-1/3 md:mx-auto mt-1 bg-primary border border-secondary rounded-md shadow-sm px-5 py-2 font-syne text-lg md:text-xl focus:border-secondary focus:outline-none">
+          <select
+            v-else
+            aria-label="Choisir une saison"
+            v-model="selectedSeason"
+            @change="onSeasonChange"
+            class="block w-full md:w-2/3 lg:w-1/2 xl:w-1/3 md:mx-auto mt-1 bg-primary border border-secondary rounded-md shadow-sm px-5 py-2 font-syne text-lg md:text-xl focus:border-secondary focus:outline-none"
+          >
             <option v-for="season in seasons" :key="season.id" :value="season.id">
               #{{ season.id }} . {{ season.title }}
             </option>
           </select>
         </div>
-
       </div>
     </section>
-
   </div>
 </template>
 
@@ -73,7 +86,7 @@ const selectedSeason = ref(1);
 // Variable pour indiquer s'il y a des épisodes
 const noEpisodes = ref(false);
 
-/// Watcher pour réinitialiser `noEpisodes` lorsque `selectedSeason` change
+// Watcher pour réinitialiser `noEpisodes` lorsque `selectedSeason` change
 watch(selectedSeason, (newSeason) => {
   noEpisodes.value = false;
   
@@ -88,7 +101,6 @@ watch(selectedSeason, (newSeason) => {
 
 // Fonction appelée lorsque le composant PooncastBySeason émet l'événement no-episodes
 function handleNoEpisodes() {
-  //console.log("No episodes");
   noEpisodes.value = true;
 }
 

@@ -1,29 +1,43 @@
 <template>
-  <div class="flex flex-col items-center justify-center bg-[url('@/assets/img/episodes/grid.svg')] bg-center bg-repeat-space sm:bg-none">
+  <div 
+    class="flex flex-col items-center justify-center bg-[url('@/assets/img/episodes/grid.svg')] bg-center bg-repeat-space sm:bg-none" 
+    aria-labelledby="episodes-section" 
+    aria-live="polite" 
+    :aria-busy="loading"
+  >
+    <h2 id="episodes-section" class="sr-only">Épisodes pour la saison sélectionnée</h2>
+    
+    <!-- Indicateur de chargement -->
     <div v-if="loading" class="flex items-center justify-center">
       <Loading fillColor="fill-secondary" />
     </div>
 
-    <div v-else-if="episodes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-2 xl:gap-5 2xl:gap-5 mt-10
-    sm:bg-[url('@/assets/img/episodes/grid.svg')] sm:bg-center sm:bg-repeat-y pb-10">
-      
+    <!-- Affichage des épisodes si disponibles -->
+    <div 
+      v-else-if="episodes.length > 0" 
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-2 xl:gap-5 2xl:gap-5 mt-10 sm:bg-[url('@/assets/img/episodes/grid.svg')] sm:bg-center sm:bg-repeat-y pb-10"
+    >
       <div v-for="pooncast in episodes" :key="pooncast.id" class="lg:mx-2">
-          <Pooncast :pooncast="pooncast" bgOpacity="bg-opacity-100" data-aos="fade-up" class="h-full" />
+        <Pooncast :pooncast="pooncast" bgOpacity="bg-opacity-100" data-aos="fade-up" class="h-full" />
       </div>
     </div>
 
+    <!-- Message pour indiquer l'absence d'épisodes -->
     <div v-else>
       <div class="mt-10 mx-2">
-        <p class="font-nunito text-lg font-bold text-center">Cette saison est en cours de création. Envoyez-nous vos questions 
-          <span class="text-nowrap"><NuxtLink to="/participez-au-pooncast" class="underline">ici</NuxtLink> !</span></p>
+        <p class="font-nunito text-lg font-bold text-center">
+          Cette saison est en cours de création. Envoyez-nous vos questions 
+          <span class="text-nowrap">
+            <NuxtLink to="/participez-au-pooncast" class="underline" aria-label="Envoyer vos questions pour le Pooncast">ici</NuxtLink> !
+          </span>
+        </p>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { usePooncastStore } from '@/stores/Pooncast/Pooncast'
+import { usePooncastStore } from '@/stores/Pooncast/Pooncast';
 
 const props = defineProps({
     season: {
@@ -45,5 +59,4 @@ const episodes = computed(() => {
   }
   return seasonEpisodes;
 });
-
 </script>
