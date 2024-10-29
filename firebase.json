@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": ".output/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "site": "pooncast-fo",
+    "cleanUrls": true,
+    "rewrites": [{ "source": "**", "function": "server_fo" }]
+  },
+  "functions": { "source": ".output/server" }  
+}
