@@ -11,7 +11,7 @@
     <div class="hidden lg:block relative">
       <div class="relative">
         <p data-aos="fade-down" class="h1">
-          Less
+          Les
           <span class="text-secondary underline-c">petites histoires</span> de
           Poon
         </p>
