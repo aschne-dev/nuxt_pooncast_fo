@@ -23,6 +23,7 @@
     "firebase": "^10.12.5",
     "firebase-admin": "^12.3.0",
     "firebase-functions": "^5.0.1",
+    "git-filter-repo": "^0.0.30",
     "nuxt": "^3.12.4",
     "nuxt-aos": "^1.2.5",
     "nuxt-booster": "^3.1.5",
