@@ -81,6 +81,8 @@ if (email.value !== '') {
 
 const isSubmitting = ref(false);
 const submitSuccess = ref(false);
+const runtimeConfig = useRuntimeConfig();
+const functionsBaseUrl = (runtimeConfig.public.functionsBaseUrl || '').replace(/\/$/, '');
 
 const errors = ref({
     email: false,
@@ -112,7 +114,10 @@ const handleSubmit = async () => {
     if (Object.values(errors.value).every(value => value === false)) {
         isSubmitting.value = true;
         try {
-            const response = await fetch('https://europe-west1-REMOVED.cloudfunctions.net/handleUnsubscribe', {
+            if (!functionsBaseUrl) {
+                throw new Error('NUXT_FUNCTIONS_BASE_URL non configurée.');
+            }
+            const response = await fetch(`${functionsBaseUrl}/handleUnsubscribe`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -150,7 +155,11 @@ const handleSubmit = async () => {
                 errorMessages.value.push("Une erreur serveur est survenue. Veuillez réessayer plus tard.");
             }
         } catch (error) {
-            errorMessages.value.push("Une erreur inattendue est survenue. Veuillez réessayer.");
+            if (error instanceof Error && error.message.includes('NUXT_FUNCTIONS_BASE_URL')) {
+                errorMessages.value.push("Configuration serveur manquante. Veuillez vérifier la variable NUXT_FUNCTIONS_BASE_URL.");
+            } else {
+                errorMessages.value.push("Une erreur inattendue est survenue. Veuillez réessayer.");
+            }
         } finally {
             isSubmitting.value = false;
         }

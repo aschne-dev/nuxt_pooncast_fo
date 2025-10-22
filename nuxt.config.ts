@@ -88,6 +88,7 @@ export default defineNuxtConfig({
       firebaseMessagingSenderId: process.env.NUXT_FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.NUXT_FIREBASE_APP_ID,
       metaPixelId: process.env.NUXT_META_PIXEL_ID,
+      functionsBaseUrl: process.env.NUXT_FUNCTIONS_BASE_URL,
     },
   },
 

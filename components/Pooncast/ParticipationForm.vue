@@ -277,6 +277,12 @@
   const { seasons, totalCount, pariticipationFormVisibleSeasons } = storeToRefs(seasonStore);
   seasonStore.fetchSeasons();
   
+  const runtimeConfig = useRuntimeConfig();
+  const functionsBaseUrl = computed(() => {
+    const base = runtimeConfig.public.functionsBaseUrl || '';
+    return base.endsWith('/') ? base.slice(0, -1) : base;
+  });
+  
   // STEPS DU FORM
   const step = ref(1);
   
@@ -531,7 +537,10 @@
     if (Object.values(errors.value).every(value => value === false)) {
       isSubmitting.value = true;
       try {
-        const response = await fetch('https://europe-west1-REMOVED.cloudfunctions.net/handleFormSubmission', {
+        if (!functionsBaseUrl.value) {
+          throw new Error("NUXT_FUNCTIONS_BASE_URL non configurée.");
+        }
+        const response = await fetch(`${functionsBaseUrl.value}/handleFormSubmission`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -603,7 +612,11 @@
           errorMessages.value.push("Une erreur serveur est survenue. Veuillez réessayer plus tard.");
         }
       } catch (error) {
-        errorMessages.value.push("Une erreur inattendue est survenue. Veuillez réessayer.");
+        if (error instanceof Error && error.message.includes("NUXT_FUNCTIONS_BASE_URL")) {
+          errorMessages.value.push("Configuration serveur manquante. Veuillez vérifier la variable NUXT_FUNCTIONS_BASE_URL.");
+        } else {
+          errorMessages.value.push("Une erreur inattendue est survenue. Veuillez réessayer.");
+        }
         const { $analytics } = useNuxtApp();
         if ($analytics) {
           logEvent($analytics, 'form_submit', {

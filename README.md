@@ -60,18 +60,50 @@ pooncast_fo2-main/
 
 Formulaires publics (participation, newsletter, désinscription) envoient leurs données vers les Cloud Functions suivantes (URL par défaut) :
 
-- `https://europe-west1-REMOVED.cloudfunctions.net/handleFormSubmission`
-- `https://europe-west1-REMOVED.cloudfunctions.net/handleNewsletterSignup`
-- `https://europe-west1-REMOVED.cloudfunctions.net/handleUnsubscribe`
+- `https://europe-west1-<votre-projet>.cloudfunctions.net/handleFormSubmission`
+- `https://europe-west1-<votre-projet>.cloudfunctions.net/handleNewsletterSignup`
+- `https://europe-west1-<votre-projet>.cloudfunctions.net/handleUnsubscribe`
 
 Adaptez ces URL ou créez des proxys si vous déplacez les fonctions côté back office. Les deux formulaires utilisent hCaptcha (`sitekey` déclarée dans les composants Vue).
 
 ## Prérequis
 
 - Node.js 18+ (recommandé par Nuxt 3) et npm 9+
-- Accès Firebase (projet `REMOVED` ou un équivalent) + Firebase CLI pour le déploiement
+- Accès à un projet Firebase (`<votre-projet>`) + Firebase CLI pour le déploiement
 - Jeton hCaptcha actif pour les formulaires (voir `components/Newsletter/FormNewsletter.vue` et `components/Pooncast/ParticipationForm.vue`)
 - (Optionnel) GitHub CLI / token pour CI/CD
+
+## Variables d’environnement
+
+Toutes les clés sensibles sont chargées depuis l’environnement (aucune valeur n’est committée).
+
+| Nom de variable | Description | Exemple |
+| --- | --- | --- |
+| `NUXT_FIREBASE_API_KEY` | Clé publique Firebase pour l’app web | `AIza…` |
+| `NUXT_FIREBASE_AUTH_DOMAIN` | Domaine d’auth Firebase | `lepooncast-aec97.firebaseapp.com` |
+| `NUXT_FIREBASE_PROJECT_ID` | ID du projet Firebase | `lepooncast-aec97` |
+| `NUXT_FIREBASE_STORAGE_BUCKET` | Bucket Storage | `lepooncast-aec97.appspot.com` |
+| `NUXT_FIREBASE_MESSAGING_SENDER_ID` | Sender ID Firebase | `895460708454` |
+| `NUXT_FIREBASE_APP_ID` | Identifiant d’application Firebase | `1:895460708454:web:208854c630f69f50299da7` |
+| `NUXT_META_PIXEL_ID` | Identifiant du Meta Pixel | `474401032084514` |
+| `NUXT_FUNCTIONS_BASE_URL` | Base URL des Cloud Functions | `https://europe-west1-lepooncast-aec97.cloudfunctions.net` |
+
+1. Crée un fichier `.env` (non versionné) à la racine et renseigne les paires clé/valeur ci-dessus.  
+2. Duplique-le en `.env.production` si tu buildes localement avant déploiement.  
+3. Déclare les mêmes variables côté Firebase Functions :  
+   ```bash
+   firebase functions:config:set \
+     nuxt.firebase_api_key="$NUXT_FIREBASE_API_KEY" \
+     nuxt.firebase_auth_domain="$NUXT_FIREBASE_AUTH_DOMAIN" \
+     nuxt.firebase_project_id="$NUXT_FIREBASE_PROJECT_ID" \
+     nuxt.firebase_storage_bucket="$NUXT_FIREBASE_STORAGE_BUCKET" \
+     nuxt.firebase_messaging_sender_id="$NUXT_FIREBASE_MESSAGING_SENDER_ID" \
+     nuxt.firebase_app_id="$NUXT_FIREBASE_APP_ID" \
+     nuxt.meta_pixel_id="$NUXT_META_PIXEL_ID" \
+     nuxt.functions_base_url="$NUXT_FUNCTIONS_BASE_URL"
+   ```
+4. Redémarre `npm run dev` après modification des fichiers `.env`.  
+5. Avant chaque déploiement, vérifie la présence des variables (`firebase functions:config:get nuxt`), exécute `npm run build -- --preset=firebase`, puis `firebase deploy`.
 
 ## Installation & démarrage
 
@@ -84,7 +116,7 @@ npm install
 npm run dev
 ```
 
-Le serveur est disponible sur <http://localhost:3000>. Les clés Firebase sont définies dans `nuxt.config.ts`; pour utiliser un autre projet, remplacez la section `vuefire.config` et mettez à jour le fichier d’identifiants admin si vos Cloud Functions y font référence.
+Le serveur est disponible sur <http://localhost:3000>. Les clés Firebase sont tirées de l’environnement (`process.env`) : adapte le contenu de ton `.env` pour cibler un autre projet sans modifier `nuxt.config.ts`.
 
 ## Scripts npm disponibles
 
@@ -98,15 +130,17 @@ Le serveur est disponible sur <http://localhost:3000>. Les clés Firebase sont d
 
 ## Configuration & bonnes pratiques
 
-- **Firebase & VueFire** : `nuxt.config.ts` initialise VueFire et Nitro Firebase (région `europe-west1`). Veillez à disposer du fichier de service Firebase Admin requis par vos fonctions (actuellement `REMOVED-firebase-adminsdk-*.json`).
+- **Firebase & VueFire** : `nuxt.config.ts` initialise VueFire et Nitro Firebase (région `europe-west1`). Veillez à disposer du fichier de service Firebase Admin requis par vos fonctions (nom de type `<projet>-firebase-adminsdk-*.json`, conservé hors repo).
 - **Analytics & consentement** : `plugins/analytics.client.js` vérifie les cookies acceptés via `useCookieControl()` avant d’initialiser Firebase Analytics et le Meta Pixel. Toute nouvelle métrique doit respecter cette logique.
 - **Styles & design system** : `assets/css/tailwind.css` regroupe les utilitaires sur-mesure (boutons, labels, inputs). Pensez à les réutiliser pour garder la cohérence graphique.
 - **Accessibilité & SEO** : les composants utilisent `aria-*`, `sr-only`, métadonnées SEO et `useHead`. Conservez ces pratiques lors de la création de nouvelles pages.
 - **Partage de contenu** : les stores `SharePooncast` et `ShareBlog` servent de bus pour l’affichage des fenêtres de partage. Préférez les actions Pinia plutôt que du state local dispersé.
+- **Hygiène des secrets** : `git filter-repo` a purgé les anciennes clés. Pour éviter de nouvelles fuites, scanne le dépôt (`git grep "AIza"`, `gitleaks`), active le secret scanning GitHub et ne commite jamais de fichiers `.env` ou d’identifiants service.
+- **Cloud Functions** : les formulaires front consomment `NUXT_FUNCTIONS_BASE_URL` pour joindre les endpoints `handleFormSubmission`, `handleNewsletterSignup` et `handleUnsubscribe`. Assure-toi que la valeur pointe vers un domaine CORS-compatible (Firebase Functions ou proxy) et qu’elle est définie côté Firebase via `functions:config:set nuxt.functions_base_url`.
 
 ## Déploiement
 
-1. Construire le projet : `npm run build`
+1. Construire le projet (preset Firebase) : `npm run build -- --preset=firebase`
 2. Vérifier localement : `npm run preview`
 3. Déployer sur Firebase Hosting + Functions (Nitro) :
    ```bash
