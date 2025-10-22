@@ -77,20 +77,20 @@ Adaptez ces URL ou créez des proxys si vous déplacez les fonctions côté back
 
 Toutes les clés sensibles sont chargées depuis l’environnement (aucune valeur n’est committée).
 
-| Nom de variable | Description | Exemple |
+| Nom de variable | Description | Exemple indicatif |
 | --- | --- | --- |
-| `NUXT_FIREBASE_API_KEY` | Clé publique Firebase pour l’app web | `AIza…` |
-| `NUXT_FIREBASE_AUTH_DOMAIN` | Domaine d’auth Firebase | `lepooncast-aec97.firebaseapp.com` |
-| `NUXT_FIREBASE_PROJECT_ID` | ID du projet Firebase | `lepooncast-aec97` |
-| `NUXT_FIREBASE_STORAGE_BUCKET` | Bucket Storage | `lepooncast-aec97.appspot.com` |
-| `NUXT_FIREBASE_MESSAGING_SENDER_ID` | Sender ID Firebase | `895460708454` |
-| `NUXT_FIREBASE_APP_ID` | Identifiant d’application Firebase | `1:895460708454:web:208854c630f69f50299da7` |
-| `NUXT_META_PIXEL_ID` | Identifiant du Meta Pixel | `474401032084514` |
-| `NUXT_FUNCTIONS_BASE_URL` | Base URL des Cloud Functions | `https://europe-west1-lepooncast-aec97.cloudfunctions.net` |
+| `NUXT_FIREBASE_API_KEY` | Clé publique Firebase pour l’app web | `votre-cle-firebase` |
+| `NUXT_FIREBASE_AUTH_DOMAIN` | Domaine d’auth Firebase | `votre-projet.firebaseapp.com` |
+| `NUXT_FIREBASE_PROJECT_ID` | ID du projet Firebase | `votre-projet` |
+| `NUXT_FIREBASE_STORAGE_BUCKET` | Bucket Storage | `votre-projet.appspot.com` |
+| `NUXT_FIREBASE_MESSAGING_SENDER_ID` | Sender ID Firebase | `000000000000` |
+| `NUXT_FIREBASE_APP_ID` | Identifiant d’application Firebase | `1:XXXXXXXXXXXX:web:YYYYYYYYYYYYYYYY` |
+| `NUXT_META_PIXEL_ID` | Identifiant du Meta Pixel | `000000000000000` |
+| `NUXT_FUNCTIONS_BASE_URL` | Base URL des Cloud Functions | `https://europe-west1-votre-projet.cloudfunctions.net` |
 
-1. Crée un fichier `.env` (non versionné) à la racine et renseigne les paires clé/valeur ci-dessus.  
-2. Duplique-le en `.env.production` si tu buildes localement avant déploiement.  
-3. Déclare les mêmes variables côté Firebase Functions :  
+1. Créez un fichier `.env` (non versionné) à la racine et renseignez les paires clé/valeur ci-dessus.  
+2. Dupliquez-le en `.env.production` si vous construisez localement avant déploiement.  
+3. Déclarez les mêmes variables côté Firebase Functions :  
    ```bash
    firebase functions:config:set \
      nuxt.firebase_api_key="$NUXT_FIREBASE_API_KEY" \
@@ -102,8 +102,8 @@ Toutes les clés sensibles sont chargées depuis l’environnement (aucune valeu
      nuxt.meta_pixel_id="$NUXT_META_PIXEL_ID" \
      nuxt.functions_base_url="$NUXT_FUNCTIONS_BASE_URL"
    ```
-4. Redémarre `npm run dev` après modification des fichiers `.env`.  
-5. Avant chaque déploiement, vérifie la présence des variables (`firebase functions:config:get nuxt`), exécute `npm run build -- --preset=firebase`, puis `firebase deploy`.
+4. Redémarrez `npm run dev` après modification des fichiers `.env`.  
+5. Avant chaque déploiement, vérifiez la présence des variables (`firebase functions:config:get nuxt`), exécutez `npm run build -- --preset=firebase`, puis `firebase deploy`.
 
 ## Installation & démarrage
 
@@ -116,7 +116,7 @@ npm install
 npm run dev
 ```
 
-Le serveur est disponible sur <http://localhost:3000>. Les clés Firebase sont tirées de l’environnement (`process.env`) : adapte le contenu de ton `.env` pour cibler un autre projet sans modifier `nuxt.config.ts`.
+Le serveur est disponible sur <http://localhost:3000>. Les clés Firebase sont tirées de l’environnement (`process.env`) : adaptez le contenu de votre `.env` pour cibler un autre projet sans modifier `nuxt.config.ts`.
 
 ## Scripts npm disponibles
 
@@ -135,8 +135,8 @@ Le serveur est disponible sur <http://localhost:3000>. Les clés Firebase sont t
 - **Styles & design system** : `assets/css/tailwind.css` regroupe les utilitaires sur-mesure (boutons, labels, inputs). Pensez à les réutiliser pour garder la cohérence graphique.
 - **Accessibilité & SEO** : les composants utilisent `aria-*`, `sr-only`, métadonnées SEO et `useHead`. Conservez ces pratiques lors de la création de nouvelles pages.
 - **Partage de contenu** : les stores `SharePooncast` et `ShareBlog` servent de bus pour l’affichage des fenêtres de partage. Préférez les actions Pinia plutôt que du state local dispersé.
-- **Hygiène des secrets** : `git filter-repo` a purgé les anciennes clés. Pour éviter de nouvelles fuites, scanne le dépôt (`git grep "AIza"`, `gitleaks`), active le secret scanning GitHub et ne commite jamais de fichiers `.env` ou d’identifiants service.
-- **Cloud Functions** : les formulaires front consomment `NUXT_FUNCTIONS_BASE_URL` pour joindre les endpoints `handleFormSubmission`, `handleNewsletterSignup` et `handleUnsubscribe`. Assure-toi que la valeur pointe vers un domaine CORS-compatible (Firebase Functions ou proxy) et qu’elle est définie côté Firebase via `functions:config:set nuxt.functions_base_url`.
+- **Hygiène des secrets** : `git filter-repo` a purgé les anciennes clés. Pour éviter de nouvelles fuites, scannez le dépôt (`git grep "AIza"`, `gitleaks`), activez le secret scanning GitHub et ne committez jamais de fichiers `.env` ou d’identifiants service.
+- **Cloud Functions** : les formulaires front consomment `NUXT_FUNCTIONS_BASE_URL` pour joindre les endpoints `handleFormSubmission`, `handleNewsletterSignup` et `handleUnsubscribe`. Assurez-vous que la valeur pointe vers un domaine CORS-compatible (Firebase Functions ou proxy) et qu’elle est définie côté Firebase via `functions:config:set nuxt.functions_base_url`.
 
 ## Déploiement
 
