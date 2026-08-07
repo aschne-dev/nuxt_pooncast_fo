@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isBackOfficeUser() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/bo_users/$(request.auth.uid));
+    }
+
+    match /bo_users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow list, create, update, delete: if false;
+    }
+
+    match /pooncasts/{document} {
+      allow read: if true;
+      allow create, update, delete: if isBackOfficeUser();
+    }
+
+    match /seasons/{document} {
+      allow read: if true;
+      allow create, update, delete: if isBackOfficeUser();
+    }
+
+    match /recommendations/{document} {
+      allow read: if true;
+      allow create, update, delete: if isBackOfficeUser();
+    }
+
+    match /faq/{document} {
+      allow read: if true;
+      allow create, update, delete: if isBackOfficeUser();
+    }
+
+    match /blogs/{document} {
+      allow read: if true;
+      allow create, update, delete: if isBackOfficeUser();
+    }
+
+    match /participations/{document} {
+      allow read, update, delete: if isBackOfficeUser();
+      allow create: if false;
+    }
+
+    match /ParticipationsCounters/{document} {
+      allow update: if isBackOfficeUser();
+      allow read, create, delete: if false;
+    }
+
+    match /newsletter/{document} {
+      allow read: if isBackOfficeUser();
+      allow create, update, delete: if false;
+    }
+  }
+}
