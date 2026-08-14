@@ -40,7 +40,7 @@
 <script setup>
 import { useSharePooncastStore } from '@/stores/Pooncast/SharePooncast';
 import { usePooncastStore } from '@/stores/Pooncast/Pooncast';
-import { logEvent } from 'firebase/analytics';
+import { slugify as generateSlug } from '~/utils/content';
 
 const sharePooncastStore = useSharePooncastStore();
 
@@ -56,27 +56,6 @@ const duration = ref(0);
 
 const pooncastStore = usePooncastStore();
 const currentPooncast = computed(() => pooncastStore.pooncastById(props.idPooncast));
-
-// Construct URLs for sharing
-function generateSlug(title) {
-  // Remplacer les caractères accentués par leurs équivalents non accentués
-  const accentMap = {
-    'à': 'a', 'â': 'a', 'ä': 'a', 'á': 'a', 'ã': 'a', 'å': 'a', 'æ': 'ae',
-    'ç': 'c', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'í': 'i', 'ì': 'i',
-    'î': 'i', 'ï': 'i', 'ñ': 'n', 'ó': 'o', 'ò': 'o', 'ô': 'o', 'ö': 'o',
-    'õ': 'o', 'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y',
-    'æ': 'ae', 'œ': 'oe'
-  };
-  
-  // Remplacer les accents
-  title = title.replace(/[àâäáãåæçéèêëíìîïñóòôöõúùûüýÿœ]/g, (match) => accentMap[match]);
-
-  // Générer le slug
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 const domainUrl = 'https://lepooncast.com';
 const shareTitle = computed(() => currentPooncast.value ? generateSlug(currentPooncast.value.titre) : 'title');

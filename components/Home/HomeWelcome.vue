@@ -86,10 +86,8 @@
                             interactive où chaque enfant se sent écouté et valorisé.
                         </p>
                         <div class="absolute -right-5 -bottom-16 lg:-right-5 lg:-bottom-7 hidden sm:block">
-                            <NuxtLink class="block pt-20" to="/participez-au-pooncast" title="Participez au Pooncast"
+                            <NuxtLink class="bg-secondary mt-20 rounded-full py-8 px-3 lg:px-5 flex flex-col items-center gap-3 border border-secondary text-primary hover:bg-primary hover:text-secondary transition-colors ease-in duration-150 group" to="/participez-au-pooncast" title="Participez au Pooncast"
                                 aria-label="Accéder à la page de participation au Pooncast">
-                                <button
-                                    class="bg-secondary rounded-full py-8 px-3 lg:px-5 flex flex-col items-center gap-3 border border-secondary text-primary hover:bg-primary hover:text-secondary transition-colors ease-in duration-150 group">
                                     <svg class="size-4 lg:size-6 animate-pulse group-hover:fill-secondary fill-primary stroke-primary group-hover:stroke-secondary transition-colors ease-in duration-150"
                                         width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <title>Participez au pooncast</title>
@@ -100,16 +98,12 @@
                                     </svg>
                                     <span class="font-syne text-sm lg:text-base leading-3 font-bold">Participez<br />au
                                         pooncast</span>
-                                </button>
                             </NuxtLink>
                         </div>
                         <div class="sm:hidden">
-                            <NuxtLink class="block pt-5" to="/participez-au-pooncast" title="Participez au Pooncast"
+                            <NuxtLink class="bg-secondary block w-full rounded-full py-3 mt-5 text-center text-primary hover:bg-primary border border-secondary hover:text-secondary transition-colors ease-in duration-150" to="/participez-au-pooncast" title="Participez au Pooncast"
                                 aria-label="Accéder à la page de participation au Pooncast">
-                                <button
-                                    class="bg-secondary w-full rounded-full py-3 mt-5 text-primary hover:bg-primary border border-secondary hover:text-secondary transition-colors ease-in duration-150">
                                     <span class="font-syne text-sm leading-3 font-bold">Participez au pooncast</span>
-                                </button>
                             </NuxtLink>
                         </div>
                     </div>

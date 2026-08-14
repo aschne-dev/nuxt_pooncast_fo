@@ -61,34 +61,33 @@
 </template>
 
 <script setup>
-useHead({
+usePooncastSeo({
     title: 'Épisodes du PoonCast - Écoutez tous les épisodes maintenant',
-    meta: [
-        {
-            hid: 'description',
-            name: 'description',
-            content: 'Écoutez tous les épisodes du Pooncast, explorez les saisons passées, et restez à jour avec vos podcasts préférés.'
-        },
-        { hid: 'og:title', property: 'og:title', content: 'Épisodes du PoonCast - Écoutez tous les épisodes maintenant' },
-        { hid: 'og:description', property: 'og:description', content: 'Écoutez tous les épisodes du Pooncast, explorez les saisons passées, et restez à jour avec vos podcasts préférés.' },
-        { hid: 'og:image', property: 'og:image', content: 'https://lepooncast.com/logo_og.jpeg' },
-        { hid: 'og:url', property: 'og:url', content: 'https://lepooncast.com/pooncast/' }
-    ]
-})
+    description: 'Écoutez tous les épisodes du Pooncast, explorez les saisons passées et découvrez les histoires qui répondent aux questions des enfants.',
+    path: '/pooncast/episodes'
+});
 
 import { usepooncastsSeasonStore } from '@/stores/Pooncast/PooncastSeason'
+import { usePooncastStore } from '@/stores/Pooncast/Pooncast'
 
 const seasonStore = usepooncastsSeasonStore();
 const {seasons, loading } = storeToRefs(seasonStore);
-seasonStore.fetchSeasons();
+const pooncastStore = usePooncastStore();
 
-const selectedSeason = ref(1);
+await callOnce('seasons', () => seasonStore.fetchSeasons());
+await callOnce('pooncasts', () => pooncastStore.fetchPooncasts(seasons.value));
+
+const selectedSeason = ref(seasons.value[0]?.id || 1);
 // Variable pour indiquer s'il y a des épisodes
 const noEpisodes = ref(false);
 
 // Watcher pour réinitialiser `noEpisodes` lorsque `selectedSeason` change
 watch(selectedSeason, (newSeason) => {
   noEpisodes.value = false;
+
+  if (!import.meta.client) {
+    return;
+  }
   
   // Défiler la page vers le haut
   setTimeout(() => {
@@ -105,14 +104,13 @@ function handleNoEpisodes() {
 }
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Episodes List',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname
         });
     }

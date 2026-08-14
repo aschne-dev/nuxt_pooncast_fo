@@ -2,7 +2,6 @@
 <div class="flex flex-col mx-5 items-center justify-center mt-[80px] md:mt-[100px] lg:mt-[200px]">
 
     <div v-if="loading">
-      <h1 class="hidden">{{ generateTitle(slugTitle) }}</h1>
         <Loading fillColor="fill-secondary" />
     </div>
 
@@ -20,89 +19,119 @@
 
 <script setup>
 import { useBlogStore } from '@/stores/Blog/blog.js';
+import { SITE_URL, serializeJsonLd, slugify, stripHtml, truncateDescription } from '~/utils/content';
 
 const { slugTitle, id } = useRoute().params;
 
 const blogStore = useBlogStore();
-const { blogs, blogById, loading } = storeToRefs(blogStore);
+const { loading } = storeToRefs(blogStore);
 
-// Charger les blogs si nécessaire lorsque le composant est monté
-onMounted(() => {
-  if (blogs.value.length === 0) {
-    blogStore.fetchBlogs().finally(() => {
-      loading.value = false;
-    });
-  } else {
-    loading.value = false;
-  }
-});
+let blogFetchError = null;
 
-// Utiliser `computed` pour obtenir le blog actuel en fonction de l'ID
-const currentBlog = computed(() => blogById.value(id));
-
-// Mettre à jour le head avec le titre par défaut basé sur le slug
-useHead({
-  title: generateTitle(slugTitle),
-  meta: [
-    {
-      hid: 'description',
-      name: 'description',
-      content: "Découvrez des articles éducatifs et amusants pour éveiller la curiosité des enfants sur le PoonBlog."
-    },
-    { hid: 'og:title', property: 'og:title', content: generateTitle(slugTitle) },
-    { hid: 'og:description', property: 'og:description', content: "Découvrez des articles éducatifs et amusants pour éveiller la curiosité des enfants sur le PoonBlog." },
-    { hid: 'og:image', property: 'og:image', content: `${domainUrl}/logo_og.jpeg` },
-    { hid: 'og:url', property: 'og:url', content: `${domainUrl}/poonblog` }
-  ]
-});
-
-
-// Surveiller les changements de `currentBlog` pour mettre à jour les meta tags
-watch(
-  () => currentBlog.value,
-  (newBlog) => {
-    if (newBlog) {
-      useHead({
-        title: newBlog.title,
-        meta: [
-          {
-            name: 'description',
-            content: newBlog.intro + ' - Le blog du Pooncast'
-          },
-          { hid: 'og:title', property: 'og:title', content: newBlog.title },
-          { hid: 'og:description', property: 'og:description', content: newBlog.intro + ' - Le blog du Pooncast' },
-          { hid: 'og:image', property: 'og:image', content: `${domainUrl}/logo_og.jpeg` },
-          { hid: 'og:url', property: 'og:url', content: domainUrl + '/poonblog/' + slugTitle + '/' + id }
-        ]
-      });
-    }
-  },
-  { immediate: true }
-);
-
-// Fonction pour générer un titre à partir d'un slug
-function generateTitle(slug) {
-  // Remplacer les tirets par des espaces
-  let title = slug.replace(/-/g, ' ');
-
-  // Capitaliser la première lettre de la phrase
-  return title.charAt(0).toUpperCase() + title.slice(1);
+try {
+  await callOnce(`blog-${id}`, () => blogStore.fetchBlogById(id));
+} catch (error) {
+  blogFetchError = error;
 }
-const domainUrl = 'https://lepooncast.com';
 
+const currentBlog = computed(() => blogStore.blogById(id));
+
+if (!currentBlog.value) {
+  if (blogFetchError) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Service Unavailable',
+      message: 'Le contenu est temporairement indisponible.',
+      fatal: true
+    });
+  }
+
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Not Found',
+    message: 'Article introuvable',
+    fatal: true
+  });
+}
+
+if (import.meta.server) {
+  const event = useRequestEvent();
+
+  if (event) {
+    setResponseHeader(
+      event,
+      'cache-control',
+      'public, max-age=0, s-maxage=300, stale-while-revalidate=3600'
+    );
+  }
+}
+
+const articlePath = computed(() => `/poonblog/${slugify(currentBlog.value.title)}/${currentBlog.value.id}`);
+const articleDescription = computed(() => truncateDescription(currentBlog.value.intro));
+const articleUrl = computed(() => new URL(articlePath.value, SITE_URL).toString());
+
+usePooncastSeo(() => ({
+  title: `${currentBlog.value.title} - Le PoonBlog`,
+  description: articleDescription.value,
+  path: articlePath.value,
+  image: currentBlog.value.visuel,
+  type: 'article',
+  publishedTime: currentBlog.value.createdAt,
+  modifiedTime: currentBlog.value.updatedAt || currentBlog.value.createdAt
+}));
+
+useHead(() => ({
+  script: [{
+    key: 'blog-posting-schema',
+    type: 'application/ld+json',
+    innerHTML: serializeJsonLd({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'BlogPosting',
+          '@id': `${articleUrl.value}#article`,
+          headline: currentBlog.value.title,
+          description: articleDescription.value,
+          image: currentBlog.value.visuel,
+          datePublished: currentBlog.value.createdAt,
+          dateModified: currentBlog.value.updatedAt || currentBlog.value.createdAt,
+          inLanguage: 'fr-FR',
+          author: {
+            '@type': 'Organization',
+            name: 'Papa et Maman',
+            url: 'https://lagencedepapaetmaman.com'
+          },
+          publisher: { '@id': `${SITE_URL}/#organization` },
+          mainEntityOfPage: articleUrl.value,
+          articleBody: stripHtml([
+            currentBlog.value.intro,
+            ...(currentBlog.value.chapters || []).map(chapter => `${chapter.name}. ${chapter.text}`)
+          ].join(' '))
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+            { '@type': 'ListItem', position: 2, name: 'PoonBlog', item: `${SITE_URL}/poonblog` },
+            { '@type': 'ListItem', position: 3, name: currentBlog.value.title, item: articleUrl.value }
+          ]
+        }
+      ]
+    })
+  }]
+}));
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Blog Article',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname,
-            blog_title: currentBlog.title,
-            blog_id: currentBlog.id
+            blog_title: currentBlog.value.title,
+            blog_id: currentBlog.value.id
         });
     }
 });

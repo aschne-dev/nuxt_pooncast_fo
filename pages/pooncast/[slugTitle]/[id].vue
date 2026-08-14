@@ -7,7 +7,10 @@
   
       <div v-else-if="currentPooncast" class="flex flex-col items-center justify-center bg-[url('@/assets/img/episodes/grid.svg')] bg-center bg-repeat-space">
           <h1 class="text-center text-secondary sm:mx-10 md:w-2/3">{{ currentPooncast.titre }}</h1>
-          <Pooncast :pooncast="currentPooncast" bgOpacity="bg-opacity-100" class="md:mt-10" />
+          <time v-if="currentPooncast.createdAt" :datetime="currentPooncast.createdAt" class="mt-4 font-nunito text-sm text-poonblack">
+            Publié le {{ formatFrenchDate(currentPooncast.createdAt) }}
+          </time>
+          <Pooncast :pooncast="currentPooncast" :show-detail-link="false" bgOpacity="bg-opacity-100" class="md:mt-10" />
       </div>
 
       <div v-else class="flex flex-col items-center justify-center">
@@ -20,89 +23,113 @@
 
 <script setup>
 import { usePooncastStore } from '@/stores/Pooncast/Pooncast.js';
+import { SITE_URL, formatFrenchDate, serializeJsonLd, slugify, stripHtml, truncateDescription } from '~/utils/content';
 
 const { slugTitle, id } = useRoute().params;
 
 const pooncastStore = usePooncastStore();
-const { pooncasts, pooncastById, loading } = storeToRefs(pooncastStore);
+const { loading } = storeToRefs(pooncastStore);
 
-if( pooncasts.value.length == 0 ) {
-  pooncastStore.fetchPooncasts();
+let pooncastFetchError = null;
+
+try {
+  await callOnce(`pooncast-${id}`, () => pooncastStore.fetchPooncastById(id));
+} catch (error) {
+  pooncastFetchError = error;
 }
 
-// Charger les blogs si nécessaire lorsque le composant est monté
-onMounted(() => {
-  if (pooncasts.value.length === 0) {
-    pooncastStore.fetchPooncasts().finally(() => {
-      loading.value = false;
+const currentPooncast = computed(() => pooncastStore.pooncastById(id));
+
+if (!currentPooncast.value) {
+  if (pooncastFetchError) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Service Unavailable',
+      message: 'Le contenu est temporairement indisponible.',
+      fatal: true
     });
-  } else {
-    loading.value = false;
   }
-});
 
-const currentPooncast = computed(() => pooncastById.value(id));
-
-const domainUrl = 'https://lepooncast.com';
-useHead({
-  title: generateTitle(slugTitle) + ' - Le Pooncast ',
-  meta: [
-      {
-          hid: 'description',
-          name: 'description',
-          content: 'Découvrez tous les épisodes du Pooncast. Écoutez les derniers épisodes, explorez les saisons passées, et restez à jour avec vos podcasts préférés.'
-      },
-      { hid: 'og:title', property: 'og:title', content: generateTitle(slugTitle) + ' - Le Pooncast ' },
-      { hid: 'og:description', property: 'og:description', content: 'Découvrez tous les épisodes du Pooncast. Écoutez les derniers épisodes, explorez les saisons passées, et restez à jour avec vos podcasts préférés.' },
-      { hid: 'og:image', property: 'og:image', content: `${domainUrl}/logo_og.jpeg` },
-      { hid: 'og:url', property: 'og:url', content: `${domainUrl}/pooncast/episodes` }
-  ]
-})
-
-watch(
-  () => currentPooncast.value,
-  (newPooncast) => {
-    if (newPooncast) {
-      useHead({
-        title: newPooncast.titre + ' - Le Pooncast ',
-        meta: [
-          {
-            name: 'description',
-            content: newPooncast.description
-          },
-          { hid: 'og:title', property: 'og:title', content: newPooncast.titre + ' - Le Pooncast ' },
-          { hid: 'og:description', property: 'og:description', content: newPooncast.description },
-          { hid: 'og:image', property: 'og:image', content: `${domainUrl}/logo_og.jpeg` },
-          { hid: 'og:url', property: 'og:url', content: domainUrl + '/pooncast/' + slugTitle + '/' + id }
-        ]
-      });
-    }
-  },
-  { immediate: true }
-);
-
-function generateTitle(slug) {
-  // Remplacer les tirets par des espaces
-  let title = slug.replace(/-/g, ' ');
-
-  // Capitaliser la première lettre de la phrase
-  return title.charAt(0).toUpperCase() + title.slice(1);
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Not Found',
+    message: 'Épisode introuvable',
+    fatal: true
+  });
 }
 
+if (import.meta.server) {
+  const event = useRequestEvent();
+
+  if (event) {
+    setResponseHeader(
+      event,
+      'cache-control',
+      'public, max-age=0, s-maxage=300, stale-while-revalidate=3600'
+    );
+  }
+}
+
+const episodePath = computed(() => `/pooncast/${slugify(currentPooncast.value.titre)}/${currentPooncast.value.id}`);
+const episodeUrl = computed(() => new URL(episodePath.value, SITE_URL).toString());
+const episodeDescription = computed(() => truncateDescription(currentPooncast.value.description));
+const listeningPlatforms = computed(() => Object.values(currentPooncast.value.audio || {}).filter(Boolean));
+
+usePooncastSeo(() => ({
+  title: `${currentPooncast.value.titre} - Le Pooncast`,
+  description: episodeDescription.value,
+  path: episodePath.value,
+  image: currentPooncast.value.visuel,
+  type: 'article',
+  publishedTime: currentPooncast.value.createdAt
+}));
+
+useHead(() => ({
+  script: [{
+    key: 'podcast-episode-schema',
+    type: 'application/ld+json',
+    innerHTML: serializeJsonLd({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'PodcastEpisode',
+          '@id': `${episodeUrl.value}#episode`,
+          name: currentPooncast.value.titre,
+          description: stripHtml(currentPooncast.value.description),
+          url: episodeUrl.value,
+          image: currentPooncast.value.visuel,
+          datePublished: currentPooncast.value.createdAt,
+          episodeNumber: currentPooncast.value.episodeNumber,
+          seasonNumber: currentPooncast.value.saison,
+          inLanguage: 'fr-FR',
+          partOfSeries: { '@id': `${SITE_URL}/#podcast` },
+          sameAs: listeningPlatforms.value
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE_URL },
+            { '@type': 'ListItem', position: 2, name: 'Épisodes', item: `${SITE_URL}/pooncast/episodes` },
+            { '@type': 'ListItem', position: 3, name: currentPooncast.value.titre, item: episodeUrl.value }
+          ]
+        }
+      ]
+    })
+  }]
+}));
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Episode',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname,
-            episode_title: currentPooncast.titre,
-            episode_id: currentPooncast.id,
-            episode_season: currentPooncast.saison
+            episode_title: currentPooncast.value.titre,
+            episode_id: currentPooncast.value.id,
+            episode_season: currentPooncast.value.saison
         });
     }
 });
