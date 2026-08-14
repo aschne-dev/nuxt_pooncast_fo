@@ -4,7 +4,34 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "site": "pooncast-fo",
     "cleanUrls": true,
-    "rewrites": [{ "source": "**", "function": "server_fo" }]
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+          { "key": "Permissions-Policy", "value": "camera=(), geolocation=(), microphone=()" }
+        ]
+      },
+      {
+        "source": "/_nuxt/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "function": {
+          "functionId": "server_fo",
+          "region": "europe-west1"
+        }
+      }
+    ]
   },
-  "functions": { "source": ".output/server" }
+  "functions": {
+    "source": ".output/server",
+    "runtime": "nodejs20"
+  }
 }

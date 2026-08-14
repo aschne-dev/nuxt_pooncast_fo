@@ -1,14 +1,13 @@
-import { initializeAnalytics, isSupported } from "firebase/analytics";
-
 export default defineNuxtPlugin(async (nuxtApp) => {
-  const firebaseApp = useFirebaseApp();
-
-  console.log("Loading analytics");
+  const { $firebaseApp: firebaseApp } = useNuxtApp();
+  const runtimeConfig = useRuntimeConfig();
 
   let analytics = null;
 
   // Fonction pour initialiser le Pixel Meta
   const initializeMetaPixel = () => {
+    if (!runtimeConfig.public.metaPixelId) return;
+
     try {
       !(function (f, b, e, v, n, t, s) {
         if (f.fbq) return;
@@ -35,9 +34,8 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         "https://connect.facebook.net/en_US/fbevents.js"
       );
 
-      fbq("init", process.env.NUXT_META_PIXEL_ID);
-      fbq("track", "PageView");
-      console.log("Meta Pixel loaded");
+      window.fbq("init", runtimeConfig.public.metaPixelId);
+      window.fbq("track", "PageView");
     } catch (error) {
       console.warn(
         "Meta Pixel could not be initialized due to client blocking."
@@ -45,41 +43,32 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     }
   };
 
-  // Vérifiez si Firebase Analytics est supporté par le navigateur
-  if (await isSupported()) {
-    console.log("Firebase Analytics is supported");
+  const { cookiesEnabledIds } = useCookieControl();
+  const analyticsConsentGiven = cookiesEnabledIds.value?.includes("analytics") ?? false;
 
-    // Vérifie si l'utilisateur a accepté les cookies de CookieControl
-    const { cookiesEnabled, cookiesEnabledIds } = useCookieControl();
+  // Le SDK Analytics ne doit être téléchargé et initialisé qu'après consentement.
+  if (analyticsConsentGiven) {
+    const { initializeAnalytics, isSupported } = await import("firebase/analytics");
 
-    if (
-      cookiesEnabled &&
-      cookiesEnabledIds.value &&
-      cookiesEnabledIds.value.includes("analytics")
-    ) {
-      console.log("Cookie accepted by user");
+    if (await isSupported()) {
       analytics = initializeAnalytics(firebaseApp);
-      initializeMetaPixel(); // Initialiser le Pixel Meta si le consentement est donné
-    } else {
-      console.log("Cookie not accepted by user");
+      initializeMetaPixel();
     }
-
-    // Watcher pour surveiller les changements du consentement de cookie analytics
-    watch(
-      () => cookiesEnabledIds.value,
-      (current, previous) => {
-        if (!previous?.includes("analytics") && current.includes("analytics")) {
-          console.log("User just accepted analytics cookie");
-          analytics = initializeAnalytics(firebaseApp); // Initialiser Analytics dynamiquement
-          initializeMetaPixel(); // Initialiser le Pixel Meta dynamiquement
-        }
-        window.location.reload();
-      },
-      { deep: true }
-    );
-  } else {
-    console.log("Firebase Analytics is not supported");
   }
+
+  // Recharger garantit que l'injection reflète immédiatement le nouveau consentement.
+  watch(
+    () => cookiesEnabledIds.value,
+    (current, previous) => {
+      const wasEnabled = previous?.includes("analytics") ?? false;
+      const isEnabled = current?.includes("analytics") ?? false;
+
+      if (wasEnabled !== isEnabled) {
+        window.location.reload();
+      }
+    },
+    { deep: true }
+  );
 
   return {
     provide: {

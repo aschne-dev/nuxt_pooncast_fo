@@ -30,8 +30,6 @@ import { useFaqStore } from '@/stores/FAQ/faq';
 const faqStore = useFaqStore();
 const { faqs, loading } = storeToRefs(faqStore);
 
-faqStore.fetchFaqs();
-
 // Gestion centralisée des états ouverts/fermés des FAQ
 const openFaqId = ref(null); 
 const toggleFaq = (id) => {

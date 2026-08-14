@@ -76,24 +76,24 @@ import { useRecommendationsStore } from '@/stores/Reco/Recommendation'
 const recommendationsStore = useRecommendationsStore()
 const { recommendations, loading } = storeToRefs(recommendationsStore);
 
-const activeRecommendation = ref('')
-
 const currentSlide = ref(0);
 const slideTo = (index) => { 
     currentSlide.value = index;
-    updateActiveRecommendation()
 }
 
-const updateActiveRecommendation = () => {
-    const currentIndex = currentSlide.value % recommendations.value.length
-    //console.log("Current = "+ currentIndex)
-    activeRecommendation.value = recommendations.value[currentIndex]
-}
+const activeRecommendation = computed(() => {
+    if (recommendations.value.length === 0) {
+        return {};
+    }
+
+    const currentIndex = ((currentSlide.value % recommendations.value.length) + recommendations.value.length) % recommendations.value.length;
+    return recommendations.value[currentIndex];
+});
 
 onMounted(async () => {
-    await recommendationsStore.fetchRecommendations()
-    await nextTick()
-    slideTo(1)
+    await recommendationsStore.fetchRecommendations();
+    await nextTick();
+    slideTo(recommendations.value.length > 1 ? 1 : 0);
 })
 
 </script>

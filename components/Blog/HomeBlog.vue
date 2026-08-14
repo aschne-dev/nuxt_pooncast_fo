@@ -38,7 +38,6 @@ import { useBlogStore } from '@/stores/Blog/blog';
 
 const blogStore = useBlogStore();
 const { loading, blogs } = storeToRefs(blogStore);
-blogStore.fetchBlogs();
 
 const shareBlogStore = useShareBlogStore();
 </script>

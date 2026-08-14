@@ -1,5 +1,6 @@
 // stores/Reco/Recommendation.js
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, getFirestore } from 'firebase/firestore/lite'
+import { normalizeContentDocument } from '~/utils/content'
 
 
 export const useRecommendationsStore = defineStore('recommendations', {
@@ -10,18 +11,25 @@ export const useRecommendationsStore = defineStore('recommendations', {
   }),
   actions: {
     async fetchRecommendations() {
+      if (this.recommendations.length > 0) {
+        this.loading = false
+        return this.recommendations
+      }
+
       this.loading = true
       this.error = null
-      const firestore = useFirestore()
+      const firestore = getFirestore(useNuxtApp().$firebaseApp)
 
       try {
         const snapshot = await getDocs(collection(firestore, 'recommendations'))
-        this.recommendations = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
+        this.recommendations = snapshot.docs.map(doc => normalizeContentDocument({ ...doc.data(), id: doc.id }))
         this.loading = false
+        return this.recommendations
       } catch (error) {
         console.error('Error fetching recommendations:', error)
         this.error = 'Error fetching recommendations'
         this.loading = false
+        throw error
       }
     },
 },

@@ -50,7 +50,6 @@ const emit = defineEmits(['no-episodes']);
 
 const pooncastStore = usePooncastStore();
 const { episodesBySeason, loading } = storeToRefs(pooncastStore);
-pooncastStore.fetchPooncasts();
 
 const episodes = computed(() => {
   const seasonEpisodes = episodesBySeason.value(props.season);
