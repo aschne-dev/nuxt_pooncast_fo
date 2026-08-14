@@ -25,7 +25,8 @@
         "source": "**",
         "function": {
           "functionId": "server_fo",
-          "region": "europe-west1"
+          "region": "europe-west1",
+          "pinTag": true
         }
       }
     ]
