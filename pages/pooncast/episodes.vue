@@ -57,6 +57,38 @@
         </div>
       </div>
     </section>
+
+    <section
+      v-if="seasonEpisodeGroups.length > 0"
+      aria-labelledby="all-episodes-title"
+      class="mx-auto mt-16 w-full max-w-5xl px-5 pb-10"
+    >
+      <h2 id="all-episodes-title" class="text-center font-syne">
+        Tous les épisodes par saison
+      </h2>
+      <p class="mt-3 text-center font-nunito text-lg">
+        Parcourez chaque saison et accédez directement à tous les épisodes du Pooncast.
+      </p>
+
+      <div class="mt-8 space-y-4">
+        <details
+          v-for="group in seasonEpisodeGroups"
+          :key="group.season.id"
+          class="rounded-2xl border border-secondary bg-primary px-5 py-4"
+        >
+          <summary class="cursor-pointer font-syne text-lg font-bold">
+            Saison {{ group.season.id }} · {{ group.season.title }}
+          </summary>
+          <ul class="mt-4 list-disc space-y-2 ps-6 font-nunito">
+            <li v-for="episode in group.episodes" :key="episode.id">
+              <NuxtLink :to="episodePath(episode)" class="underline hover:no-underline">
+                Épisode {{ episode.episodeNumber }} · {{ episode.titre }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </details>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -69,6 +101,7 @@ usePooncastSeo({
 
 import { usepooncastsSeasonStore } from '@/stores/Pooncast/PooncastSeason'
 import { usePooncastStore } from '@/stores/Pooncast/Pooncast'
+import { slugify } from '~/utils/content'
 
 const seasonStore = usepooncastsSeasonStore();
 const {seasons, loading } = storeToRefs(seasonStore);
@@ -76,6 +109,17 @@ const pooncastStore = usePooncastStore();
 
 await callOnce('seasons', () => seasonStore.fetchSeasons());
 await callOnce('pooncasts', () => pooncastStore.fetchPooncasts(seasons.value));
+
+const seasonEpisodeGroups = computed(() => seasons.value
+  .map(season => ({
+    season,
+    episodes: pooncastStore.episodesBySeason(season.id),
+  }))
+  .filter(group => group.episodes.length > 0));
+
+function episodePath(episode) {
+  return `/pooncast/${slugify(episode.titre)}/${episode.id}`;
+}
 
 const selectedSeason = ref(seasons.value[0]?.id || 1);
 // Variable pour indiquer s'il y a des épisodes
