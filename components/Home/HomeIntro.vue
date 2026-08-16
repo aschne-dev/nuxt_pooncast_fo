@@ -131,6 +131,7 @@
 
             <div>
               <NuxtLink
+                class="btn bg-poonblack text-primary"
                 :to="{
                   path: '/inscrivez-vous-au-pooncast',
                   query: { email: email },
@@ -138,7 +139,7 @@
                 title="Inscrivez vous au Pooncast"
                 aria-label="Envoyer l'email pour s'inscrire"
               >
-                <button class="btn bg-poonblack text-primary">Envoyer</button>
+                Envoyer
               </NuxtLink>
             </div>
           </div>
@@ -172,14 +173,13 @@
         </div>
 
         <NuxtLink
-          class="block"
+          class="btn-secondary-white w-60 lg:w-auto group"
           to="/pooncast/episodes"
           data-aos="fade"
           data-aos-delay="600"
           title="Épisodes"
           aria-label="Écouter les épisodes"
         >
-          <button class="btn-secondary-white w-60 lg:w-auto group">
             <span>Écouter les épisodes</span>
             <svg
               class="size-7 group-hover:animate-bounce-right fill-primary group-hover:fill-black"
@@ -193,7 +193,6 @@
                 d="M16 2.59766C13.2311 2.59766 10.5243 3.41874 8.22202 4.95708C5.91973 6.49542 4.12532 8.68192 3.06569 11.2401C2.00607 13.7983 1.72882 16.6132 2.26901 19.3289C2.80921 22.0447 4.14258 24.5392 6.10051 26.4972C8.05845 28.4551 10.553 29.7885 13.2687 30.3286C15.9845 30.8688 18.7994 30.5916 21.3576 29.532C23.9157 28.4723 26.1022 26.6779 27.6406 24.3756C29.1789 22.0734 30 19.3666 30 16.5977C30 12.8846 28.525 9.32367 25.8995 6.69816C23.274 4.07265 19.713 2.59766 16 2.59766ZM23.447 17.4927L11.447 23.4927C11.2945 23.5689 11.1251 23.6048 10.9548 23.5971C10.7845 23.5894 10.619 23.5383 10.474 23.4486C10.329 23.3589 10.2093 23.2337 10.1264 23.0847C10.0434 22.9358 9.99993 22.7681 10 22.5977V10.5977C10.0001 10.4273 10.0437 10.2597 10.1268 10.1109C10.2098 9.96213 10.3294 9.83702 10.4744 9.74746C10.6194 9.6579 10.7848 9.60687 10.955 9.5992C11.1252 9.59154 11.2946 9.62749 11.447 9.70366L23.447 15.7037C23.6129 15.7868 23.7524 15.9144 23.8498 16.0723C23.9473 16.2302 23.9989 16.4121 23.9989 16.5977C23.9989 16.7832 23.9473 16.9651 23.8498 17.123C23.7524 17.2809 23.6129 17.4085 23.447 17.4917"
               />
             </svg>
-          </button>
         </NuxtLink>
 
         <!-- <NuxtLink class="block" to="#" data-aos="fade" data-aos-delay="800">
@@ -264,7 +263,7 @@
     </div>
 
     <!-- MOBILE -->
-    <div class="lg:hidden relative h-svh flex flex-col justify-center z-10">
+    <div class="mobile-hero relative z-10 flex h-svh w-full min-w-0 max-w-full flex-col justify-center lg:hidden">
       <div class="mt-28">
         <div class="relative">
           <p data-aos="fade-right" class="h1">
@@ -377,9 +376,9 @@
       <div class="">
         <div class="flex flex-col items-center mt-20 mb-10">
           <div
-            class="relative overflow-hidden border border-poonblack rounded-full flex justify-between items-center"
+            class="relative flex w-[290px] max-w-full items-center justify-between overflow-hidden rounded-full border border-poonblack"
           >
-            <div class="ms-2">
+            <div class="ms-2 min-w-0 flex-1">
               <label
                 for="email-input-mobile"
                 id="newsletter-mobile-label"
@@ -394,15 +393,15 @@
                 placeholder="Mail"
                 name="email"
                 class="input placeholder:text-secondary font-syne bg-primary"
-                size="30"
                 tabindex="0"
                 autocomplete="email"
                 aria-labelledby="newsletter-mobile-label"
               />
             </div>
 
-            <div>
+            <div class="shrink-0">
               <NuxtLink
+                class="btn bg-poonblack text-primary"
                 :to="{
                   path: '/inscrivez-vous-au-pooncast',
                   query: { email: email },
@@ -410,7 +409,7 @@
                 title="Inscrivez-vous au Pooncast"
                 aria-label="Inscrivez-vous au Pooncast"
               >
-                <button class="btn bg-poonblack text-primary">Envoyer</button>
+                Envoyer
               </NuxtLink>
             </div>
           </div>
@@ -423,12 +422,11 @@
           </p>
 
           <NuxtLink
-            class="block mt-5 z-10"
+            class="btn-secondary-white mt-5 z-10 w-auto group"
             to="/pooncast/episodes"
             title="Épisodes"
             aria-label="Écouter les épisodes"
           >
-            <button class="btn-secondary-white w-auto group">
               <span>Écouter les épisodes</span>
               <svg
                 class="xl:size-7 fill-primary group-hover:fill-black group-hover:animate-bounce-right"
@@ -442,7 +440,6 @@
                   d="M16 2.59766C13.2311 2.59766 10.5243 3.41874 8.22202 4.95708C5.91973 6.49542 4.12532 8.68192 3.06569 11.2401C2.00607 13.7983 1.72882 16.6132 2.26901 19.3289C2.80921 22.0447 4.14258 24.5392 6.10051 26.4972C8.05845 28.4551 10.553 29.7885 13.2687 30.3286C15.9845 30.8688 18.7994 30.5916 21.3576 29.532C23.9157 28.4723 26.1022 26.6779 27.6406 24.3756C29.1789 22.0734 30 19.3666 30 16.5977C30 12.8846 28.525 9.32367 25.8995 6.69816C23.274 4.07265 19.713 2.59766 16 2.59766ZM23.447 17.4927L11.447 23.4927C11.2945 23.5689 11.1251 23.6048 10.9548 23.5971C10.7845 23.5894 10.619 23.5383 10.474 23.4486C10.329 23.3589 10.2093 23.2337 10.1264 23.0847C10.0434 22.9358 9.99993 22.7681 10 22.5977V10.5977C10.0001 10.4273 10.0437 10.2597 10.1268 10.1109C10.2098 9.96213 10.3294 9.83702 10.4744 9.74746C10.6194 9.6579 10.7848 9.60687 10.955 9.5992C11.1252 9.59154 11.2946 9.62749 11.447 9.70366L23.447 15.7037C23.6129 15.7868 23.7524 15.9144 23.8498 16.0723C23.9473 16.2302 23.9989 16.4121 23.9989 16.5977C23.9989 16.7832 23.9473 16.9651 23.8498 17.123C23.7524 17.2809 23.6129 17.4085 23.447 17.4917"
                 />
               </svg>
-            </button>
           </NuxtLink>
         </div>
         <!-- <NuxtLink class="block" to="#" data-aos="fade" data-aos-delay="800">
@@ -507,6 +504,12 @@ const email = ref("");
 }
 
 .custom-bounce {
-  animation: bounce 1s 5;
+    animation: bounce 1s 5;
+}
+
+@media (max-width: 420px) {
+  .mobile-hero .h1 {
+    font-size: 25px;
+  }
 }
 </style>

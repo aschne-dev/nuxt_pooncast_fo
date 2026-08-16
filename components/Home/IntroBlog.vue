@@ -18,8 +18,8 @@
       </div>
 
       <!-- Lien vers tous les articles avec aria-label pour plus de clarté -->
-      <NuxtLink to="/poonblog/" class="mt-10" title="Voir tous les articles" aria-label="Voir tous les articles du PoonBlog">
-          <button class="btn" data-aos="fade">Voir tous les articles</button>   
+      <NuxtLink to="/poonblog/" class="btn mt-10" title="Voir tous les articles" aria-label="Voir tous les articles du PoonBlog" data-aos="fade">
+          Voir tous les articles
       </NuxtLink>  
 
   </div>
@@ -31,7 +31,5 @@ import BlogSnapshot from '../Blog/BlogSnapshot.vue';
 import { useBlogStore } from '@/stores/Blog/blog';
 const blogStore = useBlogStore();
 const { loading, blogs } = storeToRefs(blogStore);
-blogStore.fetchBlogs();
 
 </script>
-

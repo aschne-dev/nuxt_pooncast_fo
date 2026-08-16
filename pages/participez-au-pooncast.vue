@@ -6,37 +6,28 @@
 
 <script setup>
 import ParticipationForm from '~/components/Pooncast/ParticipationForm.vue';
-const domainUrl = 'https://lepooncast.com';
-useHead({
+import { usepooncastsSeasonStore } from '~/stores/Pooncast/PooncastSeason';
+
+const seasonStore = usepooncastsSeasonStore();
+await Promise.allSettled([
+    callOnce('seasons', () => seasonStore.fetchSeasons())
+]);
+
+usePooncastSeo({
     title: "Participez au PoonCast - Partagez vos idées et rejoignez l'aventure",
-    meta: [
-        {
-            hid: 'description',
-            name: 'description',
-            content: "Participez au PoonCast en proposant vos idées et questions pour des contenus éducatifs captivants. Rejoignez l'aventure maintenant !"
-        },
-        {
-            hid: 'canonical',
-            rel: 'canonical',
-            href: 'https://lepooncast.com/participez-au-pooncast'
-        },
-        { hid: 'og:title', property: 'og:title', content: "Participez au PoonCast - Partagez vos idées et rejoignez l'aventure" },
-        { hid: 'og:description', property: 'og:description', content: "Participez au PoonCast en proposant vos idées et questions pour des contenus éducatifs captivants. Rejoignez l'aventure maintenant !" },
-        { hid: 'og:image', property: 'og:image', content: `${domainUrl}/logo_og.jpeg` },
-        { hid: 'og:url', property: 'og:url', content: 'https://lepooncast.com/participez-au-pooncast/' }
-    ]
+    description: "Parents, envoyez la question de votre enfant au Pooncast par écrit ou en message audio pour inspirer une prochaine histoire éducative.",
+    path: '/participez-au-pooncast'
 });
 
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Participation Form',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname
         });
     }

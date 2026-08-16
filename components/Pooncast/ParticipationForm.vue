@@ -23,34 +23,34 @@
               
               <!-- PRENOM -->
               <div class="relative w-full">
-                <label class="label" :class="isFocused['firstName'] ? '-top-4 left-1 font-bold' : 'top-1 left-2 invisible font-normal'">
+                <label for="participation-first-name" class="label" :class="isFocused['firstName'] ? '-top-4 left-1 font-bold' : 'sr-only font-normal'">
                   Prénom de l'enfant
                 </label>
-                <input v-model="firstName" type="text" placeholder="Prénom de l'enfant (obligatoire)" name="first-name" class="input" size="30" autocomplete="given-name" :class="[isFocused['firstName'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['firstName'] ? 'placeholder:text-red-500' : 'placeholder:text-secondary']" @focus="isFocused['firstName'] = true" @blur="handleFirstNameBlur" />
+                <input id="participation-first-name" v-model="firstName" type="text" placeholder="Prénom de l'enfant (obligatoire)" name="first-name" class="input" size="30" autocomplete="given-name" :class="[isFocused['firstName'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['firstName'] ? 'placeholder:text-red-500' : 'placeholder:text-secondary']" @focus="isFocused['firstName'] = true" @blur="handleFirstNameBlur" />
               </div>
   
               <!-- AGE -->
               <div class="relative w-full">
-                <label class="label" :class="isFocused['age'] ? '-top-4 left-1 font-bold' : 'top-1 left-2 invisible font-normal'">
+                <label for="participation-age" class="label" :class="isFocused['age'] ? '-top-4 left-1 font-bold' : 'sr-only font-normal'">
                   Âge de l'enfant
                 </label>
-                <input v-model="age" type="number" inputmode="numeric" placeholder="Âge de l'enfant (obligatoire)" name="age" class="input" size="30" autocomplete="off" :class="[isFocused['age'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['age'] ? 'placeholder:text-red-500' : 'placeholder:text-secondary']" @focus="isFocused['age'] = true" @blur="handleAgeBlur" />
+                <input id="participation-age" v-model="age" type="number" inputmode="numeric" placeholder="Âge de l'enfant (obligatoire)" name="age" class="input" size="30" autocomplete="off" :class="[isFocused['age'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['age'] ? 'placeholder:text-red-500' : 'placeholder:text-secondary']" @focus="isFocused['age'] = true" @blur="handleAgeBlur" />
               </div>
   
               <!-- VILLE -->
               <div class="relative w-full">
-                <label class="label" :class="isFocused['city'] ? '-top-4 left-1 font-bold' : 'top-1 left-2 invisible font-normal'">
+                <label for="participation-city" class="label" :class="isFocused['city'] ? '-top-4 left-1 font-bold' : 'sr-only font-normal'">
                   Ville
                 </label>
-                <input v-model="city" type="text" placeholder="Ville (facultatif)" name="city" class="input placeholder:text-tertiary" size="30" autocomplete="address-level2" :class="[isFocused['city'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100']" @focus="isFocused['city'] = true" @blur="handleCityBlur" />
+                <input id="participation-city" v-model="city" type="text" placeholder="Ville (facultatif)" name="city" class="input placeholder:text-tertiary" size="30" autocomplete="address-level2" :class="[isFocused['city'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100']" @focus="isFocused['city'] = true" @blur="handleCityBlur" />
               </div>
   
               <!-- MAIL -->
               <div class="relative w-full">
-                <label class="label" :class="[isFocused['email'] ? '-top-4 left-1 font-bold' : 'top-1 left-2 invisible font-normal']">
+                <label for="participation-email" class="label" :class="[isFocused['email'] ? '-top-4 left-1 font-bold' : 'sr-only font-normal']">
                   Mail
                 </label>
-                <input v-model="email" type="text" inputmode="email" placeholder="Mail (obligatoire)" name="email" class="input" size="30" autocomplete="email" :class="[isFocused['email'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['email'] ? 'placeholder:text-red-500 text-red-500' : 'placeholder:text-secondary']" @focus="isFocused['email'] = true" @blur="handleEmailBlur" />
+                <input id="participation-email" v-model="email" type="email" inputmode="email" placeholder="Mail (obligatoire)" name="email" class="input" size="30" autocomplete="email" :class="[isFocused['email'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['email'] ? 'placeholder:text-red-500 text-red-500' : 'placeholder:text-secondary']" @focus="isFocused['email'] = true" @blur="handleEmailBlur" />
               </div>
   
               <div>
@@ -59,7 +59,7 @@
   
               <!-- MESSAGES ERREUR -->
               <collapse-transition>
-                <div v-if="errorMessages.length > 0" class="mt-5 p-4 text-red-500 bg-red-100 border border-red-500 rounded-xl">
+                <div v-if="errorMessages.length > 0" class="mt-5 p-4 text-red-500 bg-red-100 border border-red-500 rounded-xl" role="alert">
                   <ul>
                     <li v-for="(message, index) in errorMessages" :key="index">
                       {{ message }}
@@ -132,10 +132,10 @@
                 </div>              
   
                 <div class="relative w-full">
-                  <label class="label" :class="isFocused['description'] ? '-top-4 left-1 font-bold' : 'top-1 left-2 invisible font-normal'">
+                  <label for="participation-description" class="label" :class="isFocused['description'] ? '-top-4 left-1 font-bold' : 'sr-only font-normal'">
                     Votre question
                   </label>
-                  <textarea v-model="description" rows="5" placeholder="Votre question" name="description" autocomplete="off" class="input" size="30" :class="[isFocused['description'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['description'] ? 'placeholder:text-red-500' : 'placeholder:text-tertiary']" @focus="isFocused['description'] = true" @blur="isFocused['description'] = description !== '' ? true : false"></textarea>
+                  <textarea id="participation-description" v-model="description" rows="5" placeholder="Votre question" name="description" autocomplete="off" class="input" :class="[isFocused['description'] ? 'placeholder:text-opacity-0' : 'placeholder:text-opacity-100', errors['description'] ? 'placeholder:text-red-500' : 'placeholder:text-tertiary']" @focus="isFocused['description'] = true" @blur="isFocused['description'] = description !== '' ? true : false"></textarea>
                 </div>
               </div>
   
@@ -147,7 +147,7 @@
   
                 <!-- CAPTCHA -->
                 <div class="mt-5 w-full flex items-center justify-center">
-                  <vue-hcaptcha ref="hcaptchaRef" v-model="hcaptchaToken" @verify="onCaptchaVerified" sitekey="4b7e841c-cedc-4b32-96e0-69e06436c76e"></vue-hcaptcha>
+                  <vue-hcaptcha ref="hcaptchaRef" v-model="hcaptchaToken" @verify="onCaptchaVerified" :sitekey="hcaptchaSiteKey"></vue-hcaptcha>
                 </div>
   
                 <!-- TERMS -->
@@ -160,7 +160,7 @@
   
                 <!-- MESSAGES ERREUR -->
                 <collapse-transition>
-                  <div v-if="errorMessages.length > 0" class="mt-5 p-4 text-red-500 bg-red-100 border border-red-500 rounded-xl">
+                  <div v-if="errorMessages.length > 0" class="mt-5 p-4 text-red-500 bg-red-100 border border-red-500 rounded-xl" role="alert">
                     <ul>
                       <li v-for="(message, index) in errorMessages" :key="index">{{ message }}</li>
                     </ul>
@@ -218,16 +218,16 @@
             </div>
           </div>
   
-          <div v-if="!submitSuccess" @click="isOpen = !isOpen" class="cursor-pointer">
-            <div class="flex items-center justify-center gap-5 mt-10">
+          <div v-if="!submitSuccess">
+            <button type="button" class="mx-auto mt-10 flex items-center justify-center gap-5" :aria-expanded="isOpen" aria-controls="participation-reasons" @click="isOpen = !isOpen">
               <p class="text-secondary font-syne text-lg font-bold underline underline-offset-4">Pourquoi participer ?</p>
               <svg :class="{ rotated: isOpen }" class="size-6 transition-transform duration-200 ease-in" xmlns="http://www.w3.org/2000/svg" width="24" height="42" viewBox="0 0 24 42" fill="none">
                 <path d="M16.4669 21.1306L1.01979 5.93775C0.711067 5.66124 0.461888 5.32662 0.286999 4.95371C0.112111 4.58079 0.0150693 4.17716 0.00161851 3.7667C-0.0118323 3.35624 0.0585812 2.94729 0.208691 2.56407C0.358801 2.18085 0.585555 1.83115 0.875532 1.53566C1.16551 1.24017 1.51281 1.00491 1.89689 0.843796C2.28096 0.682678 2.69399 0.598987 3.11154 0.597671C3.52909 0.596355 3.94266 0.677444 4.32777 0.836139C4.71289 0.994835 5.06171 1.22791 5.35361 1.52156L5.42964 1.59635L23.0859 18.9578C23.6712 19.5336 24 20.3144 24 21.1285C24 21.9427 23.6712 22.7235 23.0859 23.2992L5.43387 40.6607C5.14903 40.9506 4.8089 41.1826 4.43292 41.3433C4.05694 41.504 3.65246 41.5903 3.24257 41.5972C2.83269 41.6041 2.42543 41.5316 2.04404 41.3838C1.66266 41.2359 1.31461 41.0156 1.01979 40.7355C0.724965 40.4553 0.489131 40.1208 0.325752 39.751C0.162373 39.3812 0.074649 38.9834 0.0675888 38.5802C0.0605285 38.1771 0.13427 37.7765 0.284604 37.4014C0.434937 37.0263 0.658918 36.684 0.943758 36.3941L1.01979 36.3193L16.4669 21.1306Z" fill="#FF774C"/>
               </svg>
-            </div>
+            </button>
   
             <collapse-transition>
-              <div v-if="isOpen" class="lg:mx-40 xl:mx-60 md:mx-20">
+              <div v-if="isOpen" id="participation-reasons" class="lg:mx-40 xl:mx-60 md:mx-20">
                 <ul class="mt-5 space-y-5">
                   <li>
                     <p class="font-bold">Faites entendre votre voix :</p>
@@ -271,13 +271,12 @@
   import CollapseTransition from '@ivanv/vue-collapse-transition/src/CollapseTransition.vue';
   import VueHcaptcha from '@hcaptcha/vue3-hcaptcha';
   import { usepooncastsSeasonStore } from '@/stores/Pooncast/PooncastSeason';
-  import { logEvent } from 'firebase/analytics';
   
   const seasonStore = usepooncastsSeasonStore();
   const { seasons, totalCount, pariticipationFormVisibleSeasons } = storeToRefs(seasonStore);
-  seasonStore.fetchSeasons();
   
   const runtimeConfig = useRuntimeConfig();
+  const hcaptchaSiteKey = runtimeConfig.public.hcaptchaSiteKey;
   const functionsBaseUrl = computed(() => {
     const base = runtimeConfig.public.functionsBaseUrl || '';
     return base.endsWith('/') ? base.slice(0, -1) : base;

@@ -31,7 +31,7 @@
       class="cursor-pointer"
       @click="trackClick('Amazon Music')"
     >
-      <img src="@/assets/img/home/logo_amazon.svg" class="size-14" :alt="'Lien Amazon Music du pooncast ' + pooncastTitle" />
+      <img :src="amazonLogo" class="size-14" :alt="'Lien Amazon Music du pooncast ' + pooncastTitle" />
     </a>
 
     <a
@@ -50,8 +50,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { logEvent } from 'firebase/analytics';
+import amazonLogoSvg from '@/assets/img/home/logo_amazon.svg?raw';
+
+const amazonLogo = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(amazonLogoSvg)}`;
 
 const props = defineProps({
   pooncastAudio: {
@@ -76,8 +77,6 @@ const trackClick = (platform) => {
       item_id: platform,
       pooncast_title: props.pooncastTitle
     });
-  } else {
-    console.error('Firebase Analytics is not initialized or logEvent is not a function.');
   }
 };
 

@@ -1,7 +1,7 @@
 <template>
-    <div class="flex items-center justify-between my-2 lg:my-5 shadow-xl">
-        <div class="bg-primary py-5 px-5 rounded-xl cursor-pointer w-full"
-            @click="toggleShowAnswer">
+    <div class="my-2 overflow-hidden rounded-xl bg-primary shadow-xl lg:my-5">
+        <button type="button" class="w-full cursor-pointer px-5 py-5 text-left"
+            :aria-expanded="isOpen" :aria-controls="`faq-answer-${faq.id}`" @click="toggleShowAnswer">
             <div class="flex justify-between items-center">
                 <p class="font-syne font-bold lg:text-xl">{{ faq.question }}</p>
                 <svg :class="{ rotated: isOpen }" class="size-6 transition-transform duration-200 ease-in" xmlns="http://www.w3.org/2000/svg" width="24" height="42" viewBox="0 0 24 42" fill="none">
@@ -9,12 +9,12 @@
                 </svg>
             </div>
 
-            <collapse-transition>
-                <div v-if="isOpen">
-                   <p class="font-nunito py-5">{{ faq.reponse }}</p>
-                </div>
-            </collapse-transition>
-        </div>
+        </button>
+        <collapse-transition>
+            <div v-show="isOpen" :id="`faq-answer-${faq.id}`" role="region">
+                <p class="px-5 pb-5 font-nunito">{{ faq.reponse }}</p>
+            </div>
+        </collapse-transition>
     </div>
 </template>
 
@@ -27,7 +27,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['toggleFaq']);
-const showEditFaq = ref(false);
 const isOpen = computed(() => props.openFaqId === props.faq.id);
 
 const toggleShowAnswer = () => {

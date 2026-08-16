@@ -37,7 +37,7 @@
 
             <a href="https://music.amazon.fr/podcasts/9119c45f-cd4e-4d0a-9f0d-16c48657e8e4/le-pooncast" target="_blank" title="Amazon Music" rel="noopener noreferrer" aria-label="Écoutez les épisodes du Pooncast sur Amazon Music">
                 <div class="flex flex-col items-center justify-center space-y-5" data-aos="fade" data-aos-delay="200">
-                    <img class="xl:w-24 lg:w-20 w-16 h-auto" src="@/assets/img/home/logo_amazon.svg" alt="Logo Amazon Music" />
+                    <img class="xl:w-24 lg:w-20 w-16 h-auto" :src="amazonLogo" alt="Logo Amazon Music" />
                     <div class="font-syne xl:text-xl font-semibold text-poonblack">Amazon Music</div>
                 </div>
             </a>
@@ -63,8 +63,8 @@
         </div>
 
         <!-- Lien vers tous les épisodes avec aria-label -->
-        <NuxtLink to="/pooncast/episodes" class="mt-5" title="Voir tous les épisodes" aria-label="Voir tous les épisodes">
-            <button class="btn-white" data-aos="fade">Voir tous les épisodes</button>   
+        <NuxtLink to="/pooncast/episodes" class="btn-white mt-5" title="Voir tous les épisodes" aria-label="Voir tous les épisodes" data-aos="fade">
+            Voir tous les épisodes
         </NuxtLink>     
     </div>
 </template>
@@ -72,6 +72,9 @@
 
 <script setup>
 import { usePooncastStore } from '@/stores/Pooncast/Pooncast.js'
+import amazonLogoSvg from '@/assets/img/home/logo_amazon.svg?raw'
+
+const amazonLogo = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(amazonLogoSvg)}`;
 
 const pooncastStore = usePooncastStore();
 const { recentPooncasts, loading } = storeToRefs(pooncastStore);
@@ -97,10 +100,6 @@ const displayedPooncasts = computed(() => {
         return recentPooncasts.value(2);
     } 
 })
-
-pooncastStore.fetchPooncasts();
-
-
 
 </script>
 

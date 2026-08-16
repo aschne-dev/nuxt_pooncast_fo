@@ -30,32 +30,63 @@
 
 <script setup>
 import IntroBlog from '~/components/Home/IntroBlog.vue';
+import { useBlogStore } from '~/stores/Blog/blog';
+import { useFaqStore } from '~/stores/FAQ/faq';
+import { usePooncastStore } from '~/stores/Pooncast/Pooncast';
+import { usepooncastsSeasonStore } from '~/stores/Pooncast/PooncastSeason';
+import { useRecommendationsStore } from '~/stores/Reco/Recommendation';
+import { serializeJsonLd, SITE_URL } from '~/utils/content';
 
-const domainUrl = 'https://lepooncast.com';
-useHead({
+const pooncastStore = usePooncastStore();
+const seasonStore = usepooncastsSeasonStore();
+const blogStore = useBlogStore();
+const faqStore = useFaqStore();
+const recommendationsStore = useRecommendationsStore();
+
+await callOnce('seasons', () => seasonStore.fetchSeasons());
+await Promise.allSettled([
+    callOnce('pooncasts', () => pooncastStore.fetchPooncasts(seasonStore.seasons)),
+    callOnce('blogs', () => blogStore.fetchBlogs()),
+    callOnce('faqs', () => faqStore.fetchFaqs()),
+    callOnce('recommendations', () => recommendationsStore.fetchRecommendations())
+]);
+
+usePooncastSeo({
     title: 'Le PoonCast - Épisodes de podcasts éducatifs pour enfants',
-    meta: [
-        {
-            hid: 'description',
-            name: 'description',
-            content: 'Découvrez le PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie avec des histoires captivantes.'
-        },
-        { hid: 'og:title', property: 'og:title', content: 'Le PoonCast - Épisodes de podcasts éducatifs pour enfants' },
-        { hid: 'og:description', property: 'og:description', content: 'Découvrez le PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie avec des histoires captivantes.' },
-        { hid: 'og:image', property: 'og:image', content: `${domainUrl}/logo_og.jpeg` },
-        { hid: 'og:url', property: 'og:url', content: domainUrl }
-    ]
-})
+    description: 'Découvrez le PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie avec des histoires captivantes.',
+    path: '/'
+});
+
+const faqSchema = computed(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    '@id': `${SITE_URL}/#faq`,
+    mainEntity: faqStore.faqs.map(faq => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+            '@type': 'Answer',
+            text: faq.reponse
+        }
+    }))
+}));
+
+useHead(() => ({
+    script: faqStore.faqs.length > 0 ? [{
+        key: 'home-faq-schema',
+        type: 'application/ld+json',
+        innerHTML: serializeJsonLd(faqSchema.value)
+    }] : []
+}));
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Home Page',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname
         });
 

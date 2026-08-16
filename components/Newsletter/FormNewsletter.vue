@@ -19,7 +19,8 @@
                         <!-- EMAIL -->
                         <div class="relative overflow-hidden border border-poonblack rounded-full flex justify-between items-center mt-5 mx-2">
                             <div class="ms-2">
-                                <input type="text"
+                                <label for="newsletter-email" class="sr-only">Adresse e-mail</label>
+                                <input id="newsletter-email" type="email"
                                 inputmode="email"
                                 placeholder="Mail" 
                                 v-model="email"
@@ -35,7 +36,7 @@
 
                         <!-- CAPTCHA-->
                         <div class="mt-5 flex items-center justify-center">
-                            <vue-hcaptcha ref="hcaptchaRef" v-model="hcaptchaToken" @verify="onCaptchaVerified" sitekey="4b7e841c-cedc-4b32-96e0-69e06436c76e"></vue-hcaptcha>
+                            <vue-hcaptcha ref="hcaptchaRef" v-model="hcaptchaToken" @verify="onCaptchaVerified" :sitekey="hcaptchaSiteKey"></vue-hcaptcha>
                         </div>
 
                         <!-- TERMS-->
@@ -52,7 +53,7 @@
                         </div>
 
                         <!-- MESSAGES ERREUR -->
-                        <div v-if="errorMessages.length > 0" class="mt-5 p-4 text-red-500 bg-red-100 border border-red-500 rounded-xl">
+                        <div v-if="errorMessages.length > 0" class="mt-5 p-4 text-red-500 bg-red-100 border border-red-500 rounded-xl" role="alert">
                             <ul>
                                 <li v-for="(message, index) in errorMessages" :key="index">
                                 {{ message }}
@@ -143,6 +144,7 @@ const isSubmitting = ref(false);
 const submitSuccess = ref(false);
 const runtimeConfig = useRuntimeConfig();
 const functionsBaseUrl = (runtimeConfig.public.functionsBaseUrl || '').replace(/\/$/, '');
+const hcaptchaSiteKey = runtimeConfig.public.hcaptchaSiteKey;
 
 const route = useRoute();
 const email = ref(route.query.email || ''); // Récupération de l'email depuis les query params

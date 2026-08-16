@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-primary bg-opacity-80" aria-labelledby="blog-detail-title">
+  <div class="bg-primary bg-opacity-80" aria-labelledby="right-title">
     
     <div class="flex flex-col lg:grid lg:grid-cols-3 lg:gap-10 mx-5">
       
      <!-- COLONNE GAUCHE -->
-    <div class="flex flex-col items-center lg:items-start lg:col-span-1" aria-labelledby="summary-title">
+    <div class="flex flex-col items-center lg:items-start lg:col-span-1">
       <div class="lg:sticky lg:top-5 lg:self-start sticky  lg:max-h-[calc(100vh-5rem)] lg:overflow-y-auto">
         
         <!-- TITRE -->
@@ -49,7 +49,7 @@
       <div class="flex flex-col items-center lg:col-span-2">
 
         <!-- TITRE -->
-        <h1 id="right-title" class="h1 text-center font-syne hidden lg:block lg:text-3xl" data-aos="fade">{{ blog.title }}</h1>
+        <h1 id="right-title" class="h1 w-full max-w-full break-words px-2 text-center font-syne lg:text-3xl" data-aos="fade">{{ blog.title }}</h1>
         
         <!-- AUTHOR-->
          <div class="flex flex-col items-center justify-center mt-5 font-nunito lg:hidden">
@@ -92,7 +92,7 @@
 
         <section v-for="(chapter, index) in blog.chapters" :key="index" :id="'chapter' + index" class="font-nunito mt-10 text-lg mx-2">
           <div class="font-bold font-syne text-xl" data-aos="fade-up">{{ chapter.name }}</div>
-          <div v-html="chapter.text" class="mt-5 list-disc list-decimal list-inside" data-aos="fade-up"></div>
+          <div v-html="sanitizeBlogHtml(chapter.text)" class="mt-5 list-disc list-decimal list-inside" data-aos="fade-up"></div>
         </section>
 
       </div>
@@ -110,7 +110,7 @@
     </div> -->
 
     <!-- CAROUSEL D'ARTICLES -->
-    <div class="mt-10 lg:mt-20">
+    <div v-if="otherBlogs.length > 0" class="mt-10 lg:mt-20">
       <h2 data-aos="fade-up" class="mx-5 lg:mx-12">Voir d'autres articles ...</h2>
       <div class=" flex justify-center">
         <div class="w-lvw">
@@ -121,8 +121,8 @@
 
     <!-- LIEN VERS HOME BLOG -->
     <div class="mt-8 flex items-center justify-center w-full lg:px-10" data-aos="fade-up">
-      <NuxtLink  to="/poonblog/" title="Voir tous le articles" aria-label="Voir tous les articles">
-          <button class="btn-secondary" data-aos="fade" >Voir tous les articles</button>   
+      <NuxtLink to="/poonblog/" class="btn-secondary" title="Voir tous les articles" aria-label="Voir tous les articles" data-aos="fade">
+          Voir tous les articles
       </NuxtLink>  
     </div>
 
@@ -137,7 +137,8 @@ import BlogCarousel from './BlogCarousel.vue';
 import CollapseTransition from '@ivanv/vue-collapse-transition/src/CollapseTransition.vue';
 import { useBlogStore } from '@/stores/Blog/blog';
 import { useShareBlogStore } from '@/stores/Blog/ShareBlog';
-import { logEvent } from 'firebase/analytics';
+import { formatFrenchDate, slugify as generateSlug } from '~/utils/content';
+import { sanitizeBlogHtml } from '~/utils/sanitize-blog-html';
 const shareBlogStore = useShareBlogStore();
 
 const blogStore = useBlogStore();
@@ -153,12 +154,7 @@ const otherBlogs = computed(() => blogStore.blogsExcludingId(props.blog.id));
 
 // Formater la date
 const formattedDate = computed(() => {
-  const date = props.blog.createdAt.toDate();
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Les mois sont 0-indexés
-  const year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
+  return formatFrenchDate(props.blog.createdAt);
 });
 
 // Gérer l'apparition du titre de la colonne gauche
@@ -192,27 +188,6 @@ function scrollToTop() {
 }
 
 
-
-// Construct URLs for sharing
-function generateSlug(title) {
-  // Remplacer les caractères accentués par leurs équivalents non accentués
-  const accentMap = {
-    'à': 'a', 'â': 'a', 'ä': 'a', 'á': 'a', 'ã': 'a', 'å': 'a', 'æ': 'ae',
-    'ç': 'c', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'í': 'i', 'ì': 'i',
-    'î': 'i', 'ï': 'i', 'ñ': 'n', 'ó': 'o', 'ò': 'o', 'ô': 'o', 'ö': 'o',
-    'õ': 'o', 'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y',
-    'æ': 'ae', 'œ': 'oe'
-  };
-  
-  // Remplacer les accents
-  title = title.replace(/[àâäáãåæçéèêëíìîïñóòôöõúùûüýÿœ]/g, (match) => accentMap[match]);
-
-  // Générer le slug
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 // Gérer le partage
 /*const handleShare = async (blogId, blogTitle) => {

@@ -40,30 +40,20 @@
   
 
 <script setup>
-useHead({
-    title: 'Le PoonCast - Épisodes de podcasts éducatifs pour enfants',
-    meta: [
-        {
-            hid: 'description',
-            name: 'description',
-            content: 'Explorez tous les épisodes du PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie. Découvrez des histoires captivantes et des leçons amusantes conçues pour éveiller la curiosité des jeunes esprits.'
-        },
-        { hid: 'og:title', property: 'og:title', content: 'Le PoonCast - Épisodes de podcasts éducatifs pour enfants' },
-        { hid: 'og:description', property: 'og:description', content: 'Explorez tous les épisodes du PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie. Découvrez des histoires captivantes et des leçons amusantes conçues pour éveiller la curiosité des jeunes esprits.' },
-        { hid: 'og:image', property: 'og:image', content: 'https://lepooncast.com/logo_og.jpeg' },
-        { hid: 'og:url', property: 'og:url', content: 'https://lepooncast.com/' }
-    ]
-})
+usePooncastSeo({
+    title: 'Termes et conditions - Le Pooncast',
+    description: 'Consultez les conditions applicables aux formulaires de participation et d’inscription à la newsletter du Pooncast.',
+    path: '/legal/termes-et-conditions'
+});
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Termes et Conditions',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname
         });
     }

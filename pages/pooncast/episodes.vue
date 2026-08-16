@@ -57,38 +57,81 @@
         </div>
       </div>
     </section>
+
+    <section
+      v-if="seasonEpisodeGroups.length > 0"
+      aria-labelledby="all-episodes-title"
+      class="mx-auto mt-16 w-full max-w-5xl px-5 pb-10"
+    >
+      <h2 id="all-episodes-title" class="text-center font-syne">
+        Tous les épisodes par saison
+      </h2>
+      <p class="mt-3 text-center font-nunito text-lg">
+        Parcourez chaque saison et accédez directement à tous les épisodes du Pooncast.
+      </p>
+
+      <div class="mt-8 space-y-4">
+        <details
+          v-for="group in seasonEpisodeGroups"
+          :key="group.season.id"
+          class="rounded-2xl border border-secondary bg-primary px-5 py-4"
+        >
+          <summary class="cursor-pointer font-syne text-lg font-bold">
+            Saison {{ group.season.id }} · {{ group.season.title }}
+          </summary>
+          <ul class="mt-4 list-disc space-y-2 ps-6 font-nunito">
+            <li v-for="episode in group.episodes" :key="episode.id">
+              <NuxtLink :to="episodePath(episode)" class="underline hover:no-underline">
+                Épisode {{ episode.episodeNumber }} · {{ episode.titre }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </details>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-useHead({
+usePooncastSeo({
     title: 'Épisodes du PoonCast - Écoutez tous les épisodes maintenant',
-    meta: [
-        {
-            hid: 'description',
-            name: 'description',
-            content: 'Écoutez tous les épisodes du Pooncast, explorez les saisons passées, et restez à jour avec vos podcasts préférés.'
-        },
-        { hid: 'og:title', property: 'og:title', content: 'Épisodes du PoonCast - Écoutez tous les épisodes maintenant' },
-        { hid: 'og:description', property: 'og:description', content: 'Écoutez tous les épisodes du Pooncast, explorez les saisons passées, et restez à jour avec vos podcasts préférés.' },
-        { hid: 'og:image', property: 'og:image', content: 'https://lepooncast.com/logo_og.jpeg' },
-        { hid: 'og:url', property: 'og:url', content: 'https://lepooncast.com/pooncast/' }
-    ]
-})
+    description: 'Écoutez tous les épisodes du Pooncast, explorez les saisons passées et découvrez les histoires qui répondent aux questions des enfants.',
+    path: '/pooncast/episodes'
+});
 
 import { usepooncastsSeasonStore } from '@/stores/Pooncast/PooncastSeason'
+import { usePooncastStore } from '@/stores/Pooncast/Pooncast'
+import { slugify } from '~/utils/content'
 
 const seasonStore = usepooncastsSeasonStore();
 const {seasons, loading } = storeToRefs(seasonStore);
-seasonStore.fetchSeasons();
+const pooncastStore = usePooncastStore();
 
-const selectedSeason = ref(1);
+await callOnce('seasons', () => seasonStore.fetchSeasons());
+await callOnce('pooncasts', () => pooncastStore.fetchPooncasts(seasons.value));
+
+const seasonEpisodeGroups = computed(() => seasons.value
+  .map(season => ({
+    season,
+    episodes: pooncastStore.episodesBySeason(season.id),
+  }))
+  .filter(group => group.episodes.length > 0));
+
+function episodePath(episode) {
+  return `/pooncast/${slugify(episode.titre)}/${episode.id}`;
+}
+
+const selectedSeason = ref(seasons.value[0]?.id || 1);
 // Variable pour indiquer s'il y a des épisodes
 const noEpisodes = ref(false);
 
 // Watcher pour réinitialiser `noEpisodes` lorsque `selectedSeason` change
 watch(selectedSeason, (newSeason) => {
   noEpisodes.value = false;
+
+  if (!import.meta.client) {
+    return;
+  }
   
   // Défiler la page vers le haut
   setTimeout(() => {
@@ -105,14 +148,13 @@ function handleNoEpisodes() {
 }
 
 // ANALYTICS
-import { logEvent } from 'firebase/analytics';
 onMounted(() => {
     const { $analytics } = useNuxtApp();
 
     if ($analytics) { // Utilisez $analytics ici
         logEvent($analytics, 'page_view', {
             page_title: 'Episodes List',
-            page_location: window.location.url,
+            page_location: window.location.href,
             page_path: window.location.pathname
         });
     }

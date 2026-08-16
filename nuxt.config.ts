@@ -1,7 +1,9 @@
+const isStagingNoIndex = process.env.NUXT_STAGING_NOINDEX === "true";
+
 export default defineNuxtConfig({
   compatibilityDate: "2024-08-15",
   ssr: true,
-  devtools: { enabled: true },
+  devtools: { enabled: false },
 
   app: {
     head: {
@@ -11,43 +13,6 @@ export default defineNuxtConfig({
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        {
-          hid: "description",
-          name: "description",
-          content:
-            "Explorez tous les épisodes du PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie. Découvrez des histoires captivantes et des leçons amusantes conçues pour éveiller la curiosité des jeunes esprits.",
-        },
-        // Open Graph
-        {
-          hid: "og:title",
-          property: "og:title",
-          content: "Le PoonCast - Épisodes de podcasts éducatifs pour enfants",
-        },
-        {
-          hid: "og:description",
-          property: "og:description",
-          content:
-            "Explorez tous les épisodes du PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie. Découvrez des histoires captivantes et des leçons amusantes conçues pour éveiller la curiosité des jeunes esprits.",
-        },
-        { hid: "og:image", property: "og:image", content: "/logo_og.jpeg" },
-        // Twitter Card
-        {
-          hid: "twitter:card",
-          name: "twitter:card",
-          content: "summary_large_image",
-        },
-        { hid: "twitter:title", name: "twitter:title", content: "Le Pooncast" },
-        {
-          hid: "twitter:description",
-          name: "twitter:description",
-          content:
-            "Explorez tous les épisodes du PoonCast, un podcast éducatif pour enfants qui répond aux grandes questions de la vie. Découvrez des histoires captivantes et des leçons amusantes conçues pour éveiller la curiosité des jeunes esprits.",
-        },
-        {
-          hid: "twitter:image",
-          name: "twitter:image",
-          content: "/logo_og.jpeg",
-        },
       ],
       link: [
         // Favicon pour les navigateurs
@@ -89,12 +54,19 @@ export default defineNuxtConfig({
       firebaseAppId: process.env.NUXT_FIREBASE_APP_ID,
       metaPixelId: process.env.NUXT_META_PIXEL_ID,
       functionsBaseUrl: process.env.NUXT_FUNCTIONS_BASE_URL,
+      hcaptchaSiteKey:
+        process.env.NUXT_HCAPTCHA_SITEKEY || "4b7e841c-cedc-4b32-96e0-69e06436c76e",
+      stagingNoIndex: isStagingNoIndex,
     },
   },
 
   nitro: {
+    externals: {
+      traceInclude: ["./node_modules/firebase-functions/lib/v1/index.js"],
+    },
     firebase: {
       gen: 2,
+      nodeVersion: "20",
       httpsOptions: {
         region: "europe-west1",
       },
@@ -102,10 +74,42 @@ export default defineNuxtConfig({
     },
   },
 
+  routeRules: {
+    "/": {
+      headers: {
+        "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      },
+    },
+    "/pooncast/episodes": {
+      headers: {
+        "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      },
+    },
+    "/poonblog": {
+      headers: {
+        "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      },
+    },
+    "/legal": {
+      headers: {
+        "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      },
+    },
+    "/legal/politique-confidentialite": {
+      headers: {
+        "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      },
+    },
+    "/legal/termes-et-conditions": {
+      headers: {
+        "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+      },
+    },
+  },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "nuxt-aos",
-    "nuxt-vuefire",
     "@pinia/nuxt",
     "vue3-carousel-nuxt",
     "@nuxtjs/fontaine",
@@ -118,25 +122,8 @@ export default defineNuxtConfig({
     once: true,
   },
 
-  // VUE FIRE
-  vuefire: {
-    config: {
-      apiKey: process.env.NUXT_FIREBASE_API_KEY,
-      authDomain: process.env.NUXT_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.NUXT_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.NUXT_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.NUXT_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.NUXT_FIREBASE_APP_ID,
-    },
-  },
-
-  // SITE
-  site: {
-    url: "https://lepooncast.com",
-    name: "Le Pooncast",
-  },
-
   // FONTAINE
+  // @ts-expect-error @nuxtjs/fontaine 0.4 does not expose its Nuxt 3 config augmentation.
   fontaine: {
     families: {
       Fraunces: true,

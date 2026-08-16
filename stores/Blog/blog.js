@@ -1,9 +1,12 @@
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, getFirestore, query, orderBy } from 'firebase/firestore/lite';
+import { normalizeContentDocument } from '~/utils/content';
+import { fetchBlogDocumentById } from '~/utils/firestore-content';
 
 export const useBlogStore = defineStore({
   id: 'Blog',
   state: () => ({ 
     blogs: [],
+    allBlogsLoaded: false,
     loading: true,
     error: null
   }),
@@ -34,20 +37,56 @@ export const useBlogStore = defineStore({
    
   actions: {
     async fetchBlogs() {
+        if (this.allBlogsLoaded) {
+          this.loading = false;
+          return this.blogs;
+        }
+
         this.loading = true;
         this.error = null;
-        const firestore = useFirestore();
+        const firestore = getFirestore(useNuxtApp().$firebaseApp);
 
         try {
             const blogsQuery = query(collection(firestore, 'blogs'), orderBy('order', 'desc'));
             const snapshot = await getDocs(blogsQuery);
-            this.blogs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            this.blogs = snapshot.docs.map(doc => normalizeContentDocument({ ...doc.data(), id: doc.id }));
+            this.allBlogsLoaded = true;
             this.loading = false;
+            return this.blogs;
           } catch (error) {
             console.error('Error fetching blogs: ', error);
             this.error = 'Error fetching blogs';
             this.loading = false;
+            throw error;
           }
+        },
+    async fetchBlogById(id) {
+      const existingBlog = this.blogById(String(id));
+
+      if (existingBlog) {
+        this.loading = false;
+        return existingBlog;
+      }
+
+      this.loading = true;
+      this.error = null;
+      const firestore = getFirestore(useNuxtApp().$firebaseApp);
+
+      try {
+        const blog = await fetchBlogDocumentById(firestore, id);
+
+        if (blog) {
+          this.blogs.push(blog);
         }
+
+        this.loading = false;
+        return blog;
+      } catch (error) {
+        console.error('Error fetching blog: ', error);
+        this.error = 'Error fetching blog';
+        this.loading = false;
+        throw error;
+      }
+    },
     },
 });

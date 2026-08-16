@@ -1,4 +1,5 @@
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, getFirestore, query, orderBy } from 'firebase/firestore/lite';
+import { normalizeContentDocument } from '~/utils/content';
 
 export const useFaqStore = defineStore({
   id: 'FaqStore',
@@ -16,19 +17,26 @@ export const useFaqStore = defineStore({
    
   actions: {
     async fetchFaqs() {
+      if (this.faqs.length > 0) {
+        this.loading = false;
+        return this.faqs;
+      }
+
       this.loading = true;
 
-      const firestore = useFirestore();
+      const firestore = getFirestore(useNuxtApp().$firebaseApp);
 
       try {
         const faqQuery = query(collection(firestore, 'faq'), orderBy('order'));
         const snapshot = await getDocs(faqQuery);
-        this.faqs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        this.faqs = snapshot.docs.map(doc => normalizeContentDocument({ ...doc.data(), id: doc.id }));
         this.loading = false;
+        return this.faqs;
       } catch (error) {
         console.error('Error fetching faq:', error);
         this.error = 'Error fetching faq';
         this.loading = false;
+        throw error;
       }
     },
   }

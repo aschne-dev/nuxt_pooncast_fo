@@ -1,5 +1,6 @@
 // stores/PooncastSeason.js
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, getFirestore, query, orderBy } from 'firebase/firestore/lite';
+import { normalizeContentDocument } from '~/utils/content';
 
 export const usepooncastsSeasonStore = defineStore('pooncastsSeason', {
   state: () => ({
@@ -20,18 +21,25 @@ export const usepooncastsSeasonStore = defineStore('pooncastsSeason', {
 
   actions: {
     async fetchSeasons() {
+      if (this.seasons.length > 0) {
+        this.loading = false;
+        return this.seasons;
+      }
+
       this.loading = true;
       this.error = null;
-      const firestore = useFirestore();
+      const firestore = getFirestore(useNuxtApp().$firebaseApp);
 
       try {
         const snapshot = await getDocs(query(collection(firestore, 'seasons'), orderBy('id', 'asc')));
-        this.seasons = snapshot.docs.map(doc => doc.data());
+        this.seasons = snapshot.docs.map(doc => normalizeContentDocument({ ...doc.data(), id: doc.data().id ?? Number(doc.id) }));
         this.loading = false;
+        return this.seasons;
       } catch (error) {
         console.error('Error fetching seasons: ', error);
         this.error = 'Error fetching seasons';
         this.loading = false;
+        throw error;
       }
     },
   },
