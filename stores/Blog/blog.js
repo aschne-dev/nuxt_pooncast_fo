@@ -2,8 +2,7 @@ import { collection, getDocs, getFirestore, query, orderBy } from 'firebase/fire
 import { normalizeContentDocument } from '~/utils/content';
 import { fetchBlogDocumentById } from '~/utils/firestore-content';
 
-export const useBlogStore = defineStore({
-  id: 'Blog',
+export const useBlogStore = defineStore('Blog', {
   state: () => ({ 
     blogs: [],
     allBlogsLoaded: false,

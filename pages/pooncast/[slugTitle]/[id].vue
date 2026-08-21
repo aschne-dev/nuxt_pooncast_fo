@@ -59,15 +59,8 @@ if (!currentPooncast.value) {
 }
 
 if (import.meta.server) {
-  const event = useRequestEvent();
-
-  if (event) {
-    setResponseHeader(
-      event,
-      'cache-control',
-      'public, max-age=0, s-maxage=300, stale-while-revalidate=3600'
-    );
-  }
+  useResponseHeader('cache-control').value =
+    'public, max-age=0, s-maxage=300, stale-while-revalidate=3600';
 }
 
 const episodePath = computed(() => `/pooncast/${slugify(currentPooncast.value.titre)}/${currentPooncast.value.id}`);

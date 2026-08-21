@@ -1,8 +1,7 @@
 import { collection, getDocs, getFirestore, query, orderBy } from 'firebase/firestore/lite';
 import { normalizeContentDocument } from '~/utils/content';
 
-export const useFaqStore = defineStore({
-  id: 'FaqStore',
+export const useFaqStore = defineStore('FaqStore', {
   state: () => ({ 
     faqs: [],
     loading: false,
