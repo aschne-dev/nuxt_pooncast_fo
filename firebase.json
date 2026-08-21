@@ -33,6 +33,6 @@
   },
   "functions": {
     "source": ".output/server",
-    "runtime": "nodejs20"
+    "runtime": "nodejs22"
   }
 }

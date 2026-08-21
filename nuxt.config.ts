@@ -1,3 +1,5 @@
+import { defineNuxtConfig } from "nuxt/config";
+
 const isStagingNoIndex = process.env.NUXT_STAGING_NOINDEX === "true";
 
 export default defineNuxtConfig({
@@ -66,7 +68,7 @@ export default defineNuxtConfig({
     },
     firebase: {
       gen: 2,
-      nodeVersion: "20",
+      nodeVersion: "22",
       httpsOptions: {
         region: "europe-west1",
       },
@@ -123,7 +125,7 @@ export default defineNuxtConfig({
   },
 
   // FONTAINE
-  // @ts-expect-error @nuxtjs/fontaine 0.4 does not expose its Nuxt 3 config augmentation.
+  // @ts-expect-error @nuxtjs/fontaine 0.5 does not expose its Nuxt 4 config augmentation.
   fontaine: {
     families: {
       Fraunces: true,
