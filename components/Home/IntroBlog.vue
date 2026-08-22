@@ -18,7 +18,7 @@
       </div>
 
       <!-- Lien vers tous les articles avec aria-label pour plus de clarté -->
-      <NuxtLink to="/poonblog/" class="btn mt-10" title="Voir tous les articles" aria-label="Voir tous les articles du PoonBlog" data-aos="fade">
+      <NuxtLink to="/poonblog" class="btn mt-10" title="Voir tous les articles" aria-label="Voir tous les articles du PoonBlog" data-aos="fade">
           Voir tous les articles
       </NuxtLink>  
 

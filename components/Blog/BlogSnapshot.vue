@@ -23,7 +23,7 @@
 
       <!-- Bouton Partager avec aria-label et titre descriptif -->
       <button type="button" @click="handleShare(blog.id, blog.title)" :aria-label="`Partager l’article : ${blog.title}`">
-        <img class="size-6" src="@/assets/img/pooncast/share.svg" alt="Icône de partage" />
+        <img class="size-6" src="@/assets/img/pooncast/share.svg" alt="Icône de partage" width="24" height="24" />
       </button>
     </div>
   </div>

@@ -11,6 +11,13 @@
             Publié le {{ formatFrenchDate(currentPooncast.createdAt) }}
           </time>
           <Pooncast :pooncast="currentPooncast" :show-detail-link="false" bgOpacity="bg-opacity-100" class="md:mt-10" />
+          <NuxtLink
+            class="btn-secondary mt-8"
+            to="/pooncast/episodes"
+            title="Découvrir tous les épisodes du Pooncast"
+          >
+            Découvrir tous les épisodes
+          </NuxtLink>
       </div>
 
       <div v-else class="flex flex-col items-center justify-center">

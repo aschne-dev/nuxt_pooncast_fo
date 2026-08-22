@@ -11,7 +11,7 @@
 
     <div v-else class="flex flex-col items-center justify-center">
         <p class="mt-7 text-secondary text-center font-bold text-2xl">Blog introuvable</p>
-        <NuxtLink class="link mt-10 mb-10 underline" to="/poonblog/" title="Tous nos articles">Tous nos articles</NuxtLink>
+        <NuxtLink class="link mt-10 mb-10 underline" to="/poonblog" title="Tous nos articles">Tous nos articles</NuxtLink>
     </div>
 
 </div>
@@ -29,7 +29,7 @@ const { loading } = storeToRefs(blogStore);
 let blogFetchError = null;
 
 try {
-  await callOnce(`blog-${id}`, () => blogStore.fetchBlogById(id));
+  await callOnce('blogs', () => blogStore.fetchBlogs());
 } catch (error) {
   blogFetchError = error;
 }

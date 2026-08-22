@@ -9,7 +9,7 @@
       class="cursor-pointer"
       @click="trackClick('Spotify')"
     >
-      <img src="@/assets/img/home/logo_spotify.svg" class="size-14" :alt="'Lien Spotify du pooncast ' + pooncastTitle" />
+      <img src="@/assets/img/home/logo_spotify.svg" class="size-14" :alt="'Lien Spotify du pooncast ' + pooncastTitle" width="56" height="56" />
     </a>
 
     <a
@@ -20,7 +20,7 @@
       class="cursor-pointer"
       @click="trackClick('Apple Podcast')"
     >
-      <img src="@/assets/img/home/logo_applepodcast.svg" class="size-14" :alt="'Lien Apple Podcast du pooncast ' + pooncastTitle" />
+      <img src="@/assets/img/home/logo_applepodcast.svg" class="size-14" :alt="'Lien Apple Podcast du pooncast ' + pooncastTitle" width="56" height="56" />
     </a>
 
     <a
@@ -31,7 +31,7 @@
       class="cursor-pointer"
       @click="trackClick('Amazon Music')"
     >
-      <img :src="amazonLogo" class="size-14" :alt="'Lien Amazon Music du pooncast ' + pooncastTitle" />
+      <img :src="amazonLogo" class="size-14" :alt="'Lien Amazon Music du pooncast ' + pooncastTitle" width="56" height="56" />
     </a>
 
     <a
@@ -42,7 +42,7 @@
       class="cursor-pointer"
       @click="trackClick('Podcast Addict')"
     >
-      <img src="@/assets/img/home/logo_podcastaddict.svg" class="size-14" :alt="'Lien Podcast Addict du pooncast ' + pooncastTitle" />
+      <img src="@/assets/img/home/logo_podcastaddict.svg" class="size-14" :alt="'Lien Podcast Addict du pooncast ' + pooncastTitle" width="56" height="56" />
     </a>
      
     </div>   

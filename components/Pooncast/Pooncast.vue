@@ -1,9 +1,11 @@
 <template>
   <div class="flex flex-col py-6 px-8 lg:px-3 relative rounded-3xl shadow-lg bg-secondary border-primary border w-80"
-       :class="[bgOpacity || 'bg-opacity-100']" :aria-labelledby="`pooncast-title-${pooncast.id}`">
+       :class="[bgOpacity || 'bg-opacity-100']"
+       :aria-labelledby="showDetailLink ? `pooncast-title-${pooncast.id}` : undefined"
+       :aria-label="showDetailLink ? undefined : `Détails de l’épisode : ${pooncast.titre}`">
        
       <!-- Titre de l'épisode masqué visuellement mais accessible aux lecteurs d'écran -->
-      <h3 class="sr-only" :id="'pooncast-title-' + pooncast.id">{{ pooncast.titre }}</h3>
+      <h3 v-if="showDetailLink" class="sr-only" :id="'pooncast-title-' + pooncast.id">{{ pooncast.titre }}</h3>
 
       <!-- IMAGE -->
       <div class="flex justify-center">

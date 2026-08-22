@@ -11,16 +11,17 @@
         <collapse-transition>
           <div v-if="showLeftTitle">
             <div class="ms-5 hidden lg:block">
-              <img :src="blog.visuel" :alt="blog.title" class="rounded-xl w-40 h-auto shadow-xl" />
+              <img :src="blog.visuel" :alt="blog.title" class="rounded-xl w-40 h-auto shadow-xl" width="160" height="160" />
             </div>
             <p @click="scrollToTop" class="h1 text-center font-syne lg:text-start text-2xl lg:text-lg mt-10 lg:ms-5 cursor-pointer">{{ blog.title }}</p>
           </div>
         </collapse-transition>
         
         <!-- MENU DESKTOP -->
-        <div 
+        <nav
           class="ms-5 flex-col hidden lg:flex lg:items-start"
           :class="{'lg:mt-20' : !showLeftTitle}"
+          aria-label="Sommaire de l’article"
         >
           <!-- AUTHOR-->
           <div class="flex-col items-start justify-center mt-5 font-nunito hidden lg:flex">
@@ -29,7 +30,7 @@
           </div>
 
           <!-- CHAPITRES-->
-          <h2 class="font-syne mt-10 lg:hidden">Sommaire</h2>
+          <p class="font-syne font-bold mt-10">Sommaire</p>
           <ul class="mt-5 font-syne text-xl lg:text-lg space-y-2 lg:mt-10">
             <li>
               <NuxtLink to="#intro">Introduction</NuxtLink>
@@ -38,7 +39,7 @@
               <NuxtLink :to="'#chapter' + index">{{ chapter.name }}</NuxtLink>
             </li>
           </ul>
-        </div>
+        </nav>
 
 
 
@@ -61,20 +62,22 @@
         
         <!-- DATE ET PARTAGE -->
         <div class="flex items-center justify-center gap-10 w-full px-5 mt-10 font-syne" data-aos="fade">
-          <div class="text-lg">{{ formattedDate }}</div>
+          <time v-if="blog.createdAt" :datetime="blog.createdAt" class="text-lg">
+            Publié le {{ formattedDate }}
+          </time>
           <div>
             <button class="" @click="handleShare(blog.id, blog.title)" aria-label="Partager cet article">
-              <img class="size-5" src="@/assets/img/pooncast/share.svg" alt="Partager cet article du poonblog" />
+              <img class="size-5" src="@/assets/img/pooncast/share.svg" alt="Partager cet article du poonblog" width="20" height="20" />
             </button>
           </div>
         </div>
 
         <!-- IMAGE -->
-        <img :src="blog.visuel" :alt="blog.title" class="rounded-xl mt-10 w-72 md:w-96 h-auto shadow-xl" data-aos="fade" />
+        <img :src="blog.visuel" :alt="blog.title" class="rounded-xl mt-10 w-72 md:w-96 h-auto shadow-xl" width="384" height="384" data-aos="fade" />
 
         <!-- MENU MOBILE -->
-        <div class="ms-5 flex flex-col items-center lg:items-start lg:hidden">
-            <h2 class="font-syne mt-10 lg:hidden">Sommaire</h2>
+        <nav class="ms-5 flex flex-col items-center lg:items-start lg:hidden" aria-label="Sommaire de l’article">
+            <p class="font-syne font-bold mt-10">Sommaire</p>
             <ul class="mt-5 font-syne text-xl lg:text-lg space-y-2 lg:mt-10">
               <li data-aos="fade-up">
                 <NuxtLink to="#intro">Introduction</NuxtLink>
@@ -83,7 +86,7 @@
                 <NuxtLink :to="'#chapter' + index">{{ chapter.name }}</NuxtLink>
               </li>
             </ul>
-        </div>
+        </nav>
 
         <!-- CONTENU -->
         <section id="intro" class="font-nunito mt-10 text-lg mx-2" data-aos="fade-up">
@@ -91,7 +94,7 @@
         </section>
 
         <section v-for="(chapter, index) in blog.chapters" :key="index" :id="'chapter' + index" class="font-nunito mt-10 text-lg mx-2">
-          <div class="font-bold font-syne text-xl" data-aos="fade-up">{{ chapter.name }}</div>
+          <h2 class="font-bold font-syne text-xl" data-aos="fade-up">{{ chapter.name }}</h2>
           <div v-html="sanitizeBlogHtml(chapter.text)" class="mt-5 list-disc list-decimal list-inside" data-aos="fade-up"></div>
         </section>
 
@@ -111,7 +114,7 @@
 
     <!-- CAROUSEL D'ARTICLES -->
     <div v-if="otherBlogs.length > 0" class="mt-10 lg:mt-20">
-      <h2 data-aos="fade-up" class="mx-5 lg:mx-12">Voir d'autres articles ...</h2>
+      <h2 data-aos="fade-up" class="mx-5 lg:mx-12">À lire aussi sur le PoonBlog</h2>
       <div class=" flex justify-center">
         <div class="w-lvw">
           <BlogCarousel :blogs="otherBlogs" />
@@ -121,7 +124,7 @@
 
     <!-- LIEN VERS HOME BLOG -->
     <div class="mt-8 flex items-center justify-center w-full lg:px-10" data-aos="fade-up">
-      <NuxtLink to="/poonblog/" class="btn-secondary" title="Voir tous les articles" aria-label="Voir tous les articles" data-aos="fade">
+      <NuxtLink to="/poonblog" class="btn-secondary" title="Voir tous les articles" aria-label="Voir tous les articles" data-aos="fade">
           Voir tous les articles
       </NuxtLink>  
     </div>
