@@ -34,6 +34,119 @@ export function truncateDescription(value = "", maxLength = 160) {
   return `${text.slice(0, maxLength - 1).replace(/\s+\S*$/, "")}…`;
 }
 
+function cleanPlainText(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+export function normalizeFaq(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => ({
+      question: cleanPlainText(item?.question),
+      answer: cleanPlainText(item?.answer),
+    }))
+    .filter((item) => item.question && item.answer)
+    .slice(0, 50);
+}
+
+export function normalizeRelatedContent(value) {
+  if (!Array.isArray(value)) return [];
+
+  const seen = new Set();
+
+  return value
+    .map((item) => ({
+      type: item?.type === "blog" || item?.type === "pooncast" ? item.type : "",
+      id: cleanPlainText(item?.id),
+    }))
+    .filter((item) => {
+      if (!item.type || !/^[A-Za-z0-9_-]{1,256}$/.test(item.id)) return false;
+      const key = `${item.type}:${item.id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 20);
+}
+
+export function normalizeEpisodeSeoContent(value) {
+  const activity = value?.activity || {};
+
+  return {
+    shortAnswer: cleanPlainText(value?.shortAnswer),
+    sections: Array.isArray(value?.sections)
+      ? value.sections
+          .map((section) => ({
+            title: cleanPlainText(section?.title),
+            content: cleanPlainText(section?.content),
+          }))
+          .filter((section) => section.title && section.content)
+          .slice(0, 50)
+      : [],
+    keyFacts: Array.isArray(value?.keyFacts)
+      ? value.keyFacts.map(cleanPlainText).filter(Boolean).slice(0, 50)
+      : [],
+    activity: {
+      title: cleanPlainText(activity.title),
+      content: cleanPlainText(activity.content),
+    },
+  };
+}
+
+export function hasEpisodeSeoContent(value) {
+  const content = normalizeEpisodeSeoContent(value);
+  return Boolean(
+    content.shortAnswer ||
+    content.sections.length ||
+    content.keyFacts.length ||
+    (content.activity.title && content.activity.content)
+  );
+}
+
+export function getSeoTitle(document, legacyTitle) {
+  return cleanPlainText(document?.seoTitle) || legacyTitle;
+}
+
+export function getMetaDescription(document, legacyDescription, maxLength = 160) {
+  const explicitDescription = cleanPlainText(document?.metaDescription);
+  return explicitDescription || truncateDescription(legacyDescription, maxLength);
+}
+
+export function createFaqSchema(value, pageUrl) {
+  const faq = normalizeFaq(value);
+  if (faq.length === 0) return null;
+
+  return {
+    '@type': 'FAQPage',
+    '@id': `${pageUrl}#faq`,
+    mainEntity: faq.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  };
+}
+
+export function resolveRelatedContent(value, blogs = [], pooncasts = []) {
+  return normalizeRelatedContent(value).flatMap((item) => {
+    if (item.type === 'blog') {
+      const blog = blogs.find((candidate) => candidate.id === item.id);
+      return blog
+        ? [{ ...item, label: blog.title, path: `/poonblog/${slugify(blog.title)}/${blog.id}` }]
+        : [];
+    }
+
+    const pooncast = pooncasts.find((candidate) => candidate.id === item.id);
+    return pooncast
+      ? [{ ...item, label: pooncast.titre, path: `/pooncast/${slugify(pooncast.titre)}/${pooncast.id}` }]
+      : [];
+  });
+}
+
 export function toIsoDate(value) {
   if (!value) {
     return null;

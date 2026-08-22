@@ -1,8 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  createFaqSchema,
   formatFrenchDate,
+  getMetaDescription,
+  getSeoTitle,
+  hasEpisodeSeoContent,
   normalizeContentDocument,
+  normalizeEpisodeSeoContent,
+  normalizeFaq,
+  resolveRelatedContent,
   serializeJsonLd,
   slugify,
   stripHtml,
@@ -21,6 +28,59 @@ test("slugify produit des slugs stables pour les titres français", () => {
 test("les descriptions HTML deviennent du texte court", () => {
   assert.equal(stripHtml("<p>Une histoire &amp; une réponse</p>"), "Une histoire & une réponse");
   assert.ok(truncateDescription("mot ".repeat(80)).length <= 160);
+});
+
+test("les champs SEO explicites ont un fallback rétrocompatible", () => {
+  const oldArticle = { title: "Titre historique", intro: "Introduction historique" };
+  const enrichedArticle = {
+    ...oldArticle,
+    seoTitle: "Titre SEO distinct",
+    metaDescription: "Description SEO distincte",
+  };
+
+  assert.equal(getSeoTitle(oldArticle, `${oldArticle.title} - Le PoonBlog`), "Titre historique - Le PoonBlog");
+  assert.equal(getMetaDescription(oldArticle, oldArticle.intro), "Introduction historique");
+  assert.equal(getSeoTitle(enrichedArticle, oldArticle.title), "Titre SEO distinct");
+  assert.equal(getMetaDescription(enrichedArticle, oldArticle.intro), "Description SEO distincte");
+});
+
+test("un ancien épisode n’active aucun bloc éditorial supplémentaire", () => {
+  assert.equal(hasEpisodeSeoContent(undefined), false);
+  assert.deepEqual(normalizeEpisodeSeoContent(undefined), {
+    shortAnswer: "",
+    sections: [],
+    keyFacts: [],
+    activity: { title: "", content: "" },
+  });
+  assert.equal(hasEpisodeSeoContent({ shortAnswer: "Une réponse SSR" }), true);
+});
+
+test("FAQPage existe uniquement pour une FAQ complète et visible", () => {
+  const pageUrl = "https://lepooncast.com/poonblog/test/id";
+  assert.equal(createFaqSchema([], pageUrl), null);
+  assert.deepEqual(normalizeFaq([{ question: "Incomplète", answer: "" }]), []);
+
+  const schema = createFaqSchema([{ question: " Pourquoi ? ", answer: " Parce que. " }], pageUrl);
+  assert.equal(schema['@type'], "FAQPage");
+  assert.equal(schema.mainEntity[0].name, "Pourquoi ?");
+  assert.equal(schema.mainEntity[0].acceptedAnswer.text, "Parce que.");
+});
+
+test("les contenus associés résolvent des URLs fondées sur les titres historiques", () => {
+  const links = resolveRelatedContent(
+    [
+      { type: "blog", id: "article-1" },
+      { type: "pooncast", id: "episode_1" },
+      { type: "blog", id: "absent" },
+    ],
+    [{ id: "article-1", title: "Titre historique de l’article", seoTitle: "Autre titre SEO" }],
+    [{ id: "episode_1", titre: "Titre historique de l’épisode", seoTitle: "Autre titre SEO" }],
+  );
+
+  assert.deepEqual(links.map(({ path }) => path), [
+    "/poonblog/titre-historique-de-l-article/article-1",
+    "/pooncast/titre-historique-de-l-episode/episode_1",
+  ]);
 });
 
 test("les timestamps Firestore sont sérialisés pour Pinia", () => {

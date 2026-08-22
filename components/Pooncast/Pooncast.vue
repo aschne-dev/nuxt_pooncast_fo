@@ -37,7 +37,7 @@
       </p>
   
       <!-- PLATEFORMES DE PODCAST -->
-      <div class="mt-5 mb-auto flex items-center justify-between w-full">
+      <div v-if="showPlatforms" class="mt-5 mb-auto flex items-center justify-between w-full">
           <PlatformsPlayer :pooncastAudio="pooncast.audio" :pooncastTitle="pooncast.titre" />
       </div>
   </div>
@@ -57,6 +57,10 @@ const props = defineProps({
     type: String,
   },
   showDetailLink: {
+    type: Boolean,
+    default: true,
+  },
+  showPlatforms: {
     type: Boolean,
     default: true,
   }

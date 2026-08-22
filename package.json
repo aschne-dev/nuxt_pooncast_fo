@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@nuxt/schema": "4.5.2",
+    "oxc-parser": "0.146.0",
     "typescript": "~5.9.3",
     "vue-tsc": "^3.3.11"
   }

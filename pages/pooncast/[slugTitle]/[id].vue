@@ -7,10 +7,18 @@
   
       <div v-else-if="currentPooncast" class="flex flex-col items-center justify-center bg-[url('@/assets/img/episodes/grid.svg')] bg-center bg-repeat-space">
           <h1 class="text-center text-secondary sm:mx-10 md:w-2/3">{{ currentPooncast.titre }}</h1>
-          <time v-if="currentPooncast.createdAt" :datetime="currentPooncast.createdAt" class="mt-4 font-nunito text-sm text-poonblack">
-            Publié le {{ formatFrenchDate(currentPooncast.createdAt) }}
+          <time v-if="currentPooncast.updatedAt || currentPooncast.createdAt" :datetime="currentPooncast.updatedAt || currentPooncast.createdAt" class="mt-4 font-nunito text-sm text-poonblack">
+            {{ currentPooncast.updatedAt ? 'Mis à jour le' : 'Publié le' }} {{ formatFrenchDate(currentPooncast.updatedAt || currentPooncast.createdAt) }}
           </time>
-          <Pooncast :pooncast="currentPooncast" :show-detail-link="false" bgOpacity="bg-opacity-100" class="md:mt-10" />
+          <Pooncast :pooncast="currentPooncast" :show-detail-link="false" :show-platforms="false" bgOpacity="bg-opacity-100" class="md:mt-10" />
+          <SeoEpisodeSeoContent :value="currentPooncast.seoContent" />
+          <div class="w-full max-w-3xl px-2">
+            <SeoContentFaq :items="currentPooncast.faq" />
+            <SeoRelatedContent :items="currentPooncast.relatedContent" :blogs="blogs" :pooncasts="pooncasts" />
+          </div>
+          <div class="mt-12 w-full max-w-xl">
+            <PooncastPlatformsPlayer :pooncast-audio="currentPooncast.audio" :pooncast-title="currentPooncast.titre" />
+          </div>
           <NuxtLink
             class="btn-secondary mt-8"
             to="/pooncast/episodes"
@@ -30,12 +38,15 @@
 
 <script setup>
 import { usePooncastStore } from '@/stores/Pooncast/Pooncast.js';
-import { SITE_URL, formatFrenchDate, serializeJsonLd, slugify, stripHtml, truncateDescription } from '~/utils/content';
+import { useBlogStore } from '@/stores/Blog/blog.js';
+import { SITE_URL, createFaqSchema, formatFrenchDate, getMetaDescription, getSeoTitle, normalizeFaq, serializeJsonLd, slugify, stripHtml } from '~/utils/content';
 
 const { slugTitle, id } = useRoute().params;
 
 const pooncastStore = usePooncastStore();
-const { loading } = storeToRefs(pooncastStore);
+const { loading, pooncasts } = storeToRefs(pooncastStore);
+const blogStore = useBlogStore();
+const { blogs } = storeToRefs(blogStore);
 
 let pooncastFetchError = null;
 
@@ -43,6 +54,15 @@ try {
   await callOnce(`pooncast-${id}`, () => pooncastStore.fetchPooncastById(id));
 } catch (error) {
   pooncastFetchError = error;
+}
+
+try {
+  await Promise.all([
+    callOnce('pooncasts', () => pooncastStore.fetchPooncasts()),
+    callOnce('blogs', () => blogStore.fetchBlogs()),
+  ]);
+} catch (error) {
+  console.error('Related content is temporarily unavailable:', error);
 }
 
 const currentPooncast = computed(() => pooncastStore.pooncastById(id));
@@ -72,16 +92,20 @@ if (import.meta.server) {
 
 const episodePath = computed(() => `/pooncast/${slugify(currentPooncast.value.titre)}/${currentPooncast.value.id}`);
 const episodeUrl = computed(() => new URL(episodePath.value, SITE_URL).toString());
-const episodeDescription = computed(() => truncateDescription(currentPooncast.value.description));
+const episodeDescription = computed(() => getMetaDescription(currentPooncast.value, currentPooncast.value.description));
+const episodeSeoTitle = computed(() => getSeoTitle(currentPooncast.value, `${currentPooncast.value.titre} - Le Pooncast`));
 const listeningPlatforms = computed(() => Object.values(currentPooncast.value.audio || {}).filter(Boolean));
+const visibleFaq = computed(() => normalizeFaq(currentPooncast.value.faq));
+const faqSchema = computed(() => createFaqSchema(visibleFaq.value, episodeUrl.value));
 
 usePooncastSeo(() => ({
-  title: `${currentPooncast.value.titre} - Le Pooncast`,
+  title: episodeSeoTitle.value,
   description: episodeDescription.value,
   path: episodePath.value,
   image: currentPooncast.value.visuel,
   type: 'article',
-  publishedTime: currentPooncast.value.createdAt
+  publishedTime: currentPooncast.value.createdAt,
+  modifiedTime: currentPooncast.value.updatedAt || currentPooncast.value.createdAt
 }));
 
 useHead(() => ({
@@ -112,8 +136,9 @@ useHead(() => ({
             { '@type': 'ListItem', position: 2, name: 'Épisodes', item: `${SITE_URL}/pooncast/episodes` },
             { '@type': 'ListItem', position: 3, name: currentPooncast.value.titre, item: episodeUrl.value }
           ]
-        }
-      ]
+        },
+        faqSchema.value
+      ].filter(Boolean)
     })
   }]
 }));

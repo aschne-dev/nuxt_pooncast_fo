@@ -19,11 +19,13 @@
 
 <script setup>
 import { useBlogStore } from '@/stores/Blog/blog.js';
-import { SITE_URL, serializeJsonLd, slugify, stripHtml, truncateDescription } from '~/utils/content';
+import { usePooncastStore } from '@/stores/Pooncast/Pooncast.js';
+import { SITE_URL, createFaqSchema, getMetaDescription, getSeoTitle, normalizeFaq, serializeJsonLd, slugify, stripHtml } from '~/utils/content';
 
 const { slugTitle, id } = useRoute().params;
 
 const blogStore = useBlogStore();
+const pooncastStore = usePooncastStore();
 const { loading } = storeToRefs(blogStore);
 
 let blogFetchError = null;
@@ -32,6 +34,12 @@ try {
   await callOnce('blogs', () => blogStore.fetchBlogs());
 } catch (error) {
   blogFetchError = error;
+}
+
+try {
+  await callOnce('pooncasts', () => pooncastStore.fetchPooncasts());
+} catch (error) {
+  console.error('Related episodes are temporarily unavailable:', error);
 }
 
 const currentBlog = computed(() => blogStore.blogById(id));
@@ -60,11 +68,14 @@ if (import.meta.server) {
 }
 
 const articlePath = computed(() => `/poonblog/${slugify(currentBlog.value.title)}/${currentBlog.value.id}`);
-const articleDescription = computed(() => truncateDescription(currentBlog.value.intro));
+const articleDescription = computed(() => getMetaDescription(currentBlog.value, currentBlog.value.intro));
+const articleSeoTitle = computed(() => getSeoTitle(currentBlog.value, `${currentBlog.value.title} - Le PoonBlog`));
 const articleUrl = computed(() => new URL(articlePath.value, SITE_URL).toString());
+const visibleFaq = computed(() => normalizeFaq(currentBlog.value.faq));
+const faqSchema = computed(() => createFaqSchema(visibleFaq.value, articleUrl.value));
 
 usePooncastSeo(() => ({
-  title: `${currentBlog.value.title} - Le PoonBlog`,
+  title: articleSeoTitle.value,
   description: articleDescription.value,
   path: articlePath.value,
   image: currentBlog.value.visuel,
@@ -108,8 +119,9 @@ useHead(() => ({
             { '@type': 'ListItem', position: 2, name: 'PoonBlog', item: `${SITE_URL}/poonblog` },
             { '@type': 'ListItem', position: 3, name: currentBlog.value.title, item: articleUrl.value }
           ]
-        }
-      ]
+        },
+        faqSchema.value
+      ].filter(Boolean)
     })
   }]
 }));

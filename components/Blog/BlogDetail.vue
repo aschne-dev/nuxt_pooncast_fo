@@ -62,8 +62,8 @@
         
         <!-- DATE ET PARTAGE -->
         <div class="flex items-center justify-center gap-10 w-full px-5 mt-10 font-syne" data-aos="fade">
-          <time v-if="blog.createdAt" :datetime="blog.createdAt" class="text-lg">
-            Publié le {{ formattedDate }}
+          <time v-if="blog.updatedAt || blog.createdAt" :datetime="blog.updatedAt || blog.createdAt" class="text-lg">
+            {{ blog.updatedAt ? 'Mis à jour le' : 'Publié le' }} {{ formattedDate }}
           </time>
           <div>
             <button class="" @click="handleShare(blog.id, blog.title)" aria-label="Partager cet article">
@@ -97,6 +97,9 @@
           <h2 class="font-bold font-syne text-xl" data-aos="fade-up">{{ chapter.name }}</h2>
           <div v-html="sanitizeBlogHtml(chapter.text)" class="mt-5 list-disc list-decimal list-inside" data-aos="fade-up"></div>
         </section>
+
+        <SeoContentFaq :items="blog.faq" />
+        <SeoRelatedContent :items="blog.relatedContent" :blogs="blogs" :pooncasts="pooncasts" />
 
       </div>
 
@@ -139,12 +142,16 @@
 import BlogCarousel from './BlogCarousel.vue';
 import CollapseTransition from '@ivanv/vue-collapse-transition/src/CollapseTransition.vue';
 import { useBlogStore } from '@/stores/Blog/blog';
+import { usePooncastStore } from '@/stores/Pooncast/Pooncast';
 import { useShareBlogStore } from '@/stores/Blog/ShareBlog';
 import { formatFrenchDate, slugify as generateSlug } from '~/utils/content';
 import { sanitizeBlogHtml } from '~/utils/sanitize-blog-html';
 const shareBlogStore = useShareBlogStore();
 
 const blogStore = useBlogStore();
+const { blogs } = storeToRefs(blogStore);
+const pooncastStore = usePooncastStore();
+const { pooncasts } = storeToRefs(pooncastStore);
 
 const props = defineProps({
   blog: {
@@ -157,7 +164,7 @@ const otherBlogs = computed(() => blogStore.blogsExcludingId(props.blog.id));
 
 // Formater la date
 const formattedDate = computed(() => {
-  return formatFrenchDate(props.blog.createdAt);
+  return formatFrenchDate(props.blog.updatedAt || props.blog.createdAt);
 });
 
 // Gérer l'apparition du titre de la colonne gauche

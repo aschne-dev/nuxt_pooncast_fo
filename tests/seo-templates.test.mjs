@@ -8,8 +8,39 @@ test("les chapitres d’article sont de vrais H2 et la date est sémantique", as
   const source = await readSource("components/Blog/BlogDetail.vue");
 
   assert.match(source, /<h2[^>]*>\{\{ chapter\.name \}\}<\/h2>/);
-  assert.match(source, /<time v-if="blog\.createdAt" :datetime="blog\.createdAt"/);
+  assert.match(source, /<time v-if="blog\.updatedAt \|\| blog\.createdAt" :datetime="blog\.updatedAt \|\| blog\.createdAt"/);
   assert.doesNotMatch(source, /<h2[^>]*>Sommaire<\/h2>/);
+});
+
+test("le contenu enrichi est rendu dans les templates SSR, avant les plateformes", async () => {
+  const [episodePage, episodeContent, faq, related] = await Promise.all([
+    readSource("pages/pooncast/[slugTitle]/[id].vue"),
+    readSource("components/Seo/EpisodeSeoContent.vue"),
+    readSource("components/Seo/ContentFaq.vue"),
+    readSource("components/Seo/RelatedContent.vue"),
+  ]);
+
+  assert.match(episodePage, /<SeoEpisodeSeoContent :value="currentPooncast\.seoContent"/);
+  assert.ok(episodePage.indexOf("<SeoEpisodeSeoContent") < episodePage.indexOf("<PooncastPlatformsPlayer"));
+  assert.match(episodeContent, /content\.shortAnswer/);
+  assert.match(episodeContent, /content\.sections/);
+  assert.match(episodeContent, /content\.keyFacts/);
+  assert.match(episodeContent, /content\.activity/);
+  assert.match(faq, /<dt[^>]*>\{\{ item\.question \}\}<\/dt>/);
+  assert.match(related, /<NuxtLink :to="link\.path"/);
+});
+
+test("les pages enrichies émettent FAQPage seulement depuis la FAQ visible", async () => {
+  const sources = await Promise.all([
+    readSource("pages/poonblog/[slugTitle]/[id].vue"),
+    readSource("pages/pooncast/[slugTitle]/[id].vue"),
+  ]);
+
+  for (const source of sources) {
+    assert.match(source, /normalizeFaq/);
+    assert.match(source, /createFaqSchema\(visibleFaq\.value/);
+    assert.match(source, /faqSchema\.value/);
+  }
 });
 
 test("une page article charge les articles connexes pendant le SSR", async () => {
